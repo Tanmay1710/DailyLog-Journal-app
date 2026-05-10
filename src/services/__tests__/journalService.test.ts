@@ -79,7 +79,6 @@ describe('journalService', () => {
     const result = await journalService.getJournals('user-1');
 
     expect(mockWhere).toHaveBeenCalledWith('userId', '==', 'user-1');
-    expect(mockWhere).toHaveBeenCalledWith('isArchived', '==', false);
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('journal-1');
   });

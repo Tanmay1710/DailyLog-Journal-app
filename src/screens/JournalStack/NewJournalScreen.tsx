@@ -130,7 +130,7 @@ export function NewJournalScreen(): JSX.Element {
       await journalService.createJournal({
         userId: user.id,
         title: title.trim(),
-        description: description.trim() || undefined,
+        description: description.trim(),
         color: color.trim(),
         fieldSchema: buildFieldSchema(),
         isArchived: false,

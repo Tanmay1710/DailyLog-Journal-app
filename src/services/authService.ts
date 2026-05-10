@@ -5,6 +5,7 @@
 
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   User as FirebaseUser,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -16,26 +17,42 @@ import { auth, db } from '@config/firebaseConfig';
 import type { User } from '@app-types';
 import { AuthError } from '@utils/errorHandler';
 
+const buildDefaultUserProfile = (firebaseUser: FirebaseUser, emailFallback?: string): Omit<User, 'id'> => ({
+  email: firebaseUser.email || emailFallback || '',
+  name: '',
+  timezone: 'UTC',
+  reminderTime: '09:00',
+  reminderEnabled: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
+
+const mapUserFromDoc = (userId: string, userData: Record<string, unknown>): User => ({
+  id: userId,
+  email: (userData.email as string) || '',
+  name: (userData.name as string) || '',
+  timezone: (userData.timezone as string) || 'UTC',
+  reminderTime: (userData.reminderTime as string) || '09:00',
+  reminderEnabled: (userData.reminderEnabled as boolean) ?? true,
+  profilePicture: userData.profilePicture as string | undefined,
+  createdAt: (userData.createdAt as { toDate?: () => Date })?.toDate?.() || new Date(),
+  updatedAt: (userData.updatedAt as { toDate?: () => Date })?.toDate?.() || new Date(),
+});
+
 /**
  * Sign up with email and password
  * Creates Firebase Auth user and Firestore user profile
  */
 export const signUp = async (email: string, password: string): Promise<User> => {
+  let firebaseUser: FirebaseUser | null = null;
+
   try {
     // Create Firebase Auth user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
+    firebaseUser = userCredential.user;
 
     // Create user profile in Firestore
-    const userProfile: Omit<User, 'id'> = {
-      email: firebaseUser.email || email,
-      name: '',
-      timezone: 'UTC',
-      reminderTime: '09:00',
-      reminderEnabled: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const userProfile: Omit<User, 'id'> = buildDefaultUserProfile(firebaseUser, email);
 
     await setDoc(doc(db, 'users', firebaseUser.uid), userProfile);
 
@@ -44,6 +61,15 @@ export const signUp = async (email: string, password: string): Promise<User> => 
       ...userProfile,
     };
   } catch (error: unknown) {
+    // Prevent partial/orphan signups if Auth user creation succeeded but Firestore profile failed.
+    if (firebaseUser) {
+      try {
+        await deleteUser(firebaseUser);
+      } catch {
+        // Best effort cleanup only.
+      }
+    }
+
     const firebaseError = error as FirebaseError;
     throw new AuthError(firebaseError.code, firebaseError.message);
   }
@@ -62,21 +88,15 @@ export const login = async (email: string, password: string): Promise<User> => {
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      throw new AuthError('user-profile-not-found', 'User profile not found');
+      const defaultProfile = buildDefaultUserProfile(firebaseUser, email);
+      await setDoc(userDocRef, defaultProfile);
+      return {
+        id: firebaseUser.uid,
+        ...defaultProfile,
+      };
     }
 
-    const userData = userDocSnap.data();
-    return {
-      id: firebaseUser.uid,
-      email: userData.email,
-      name: userData.name,
-      timezone: userData.timezone,
-      reminderTime: userData.reminderTime,
-      reminderEnabled: userData.reminderEnabled,
-      profilePicture: userData.profilePicture,
-      createdAt: userData.createdAt?.toDate?.() || new Date(),
-      updatedAt: userData.updatedAt?.toDate?.() || new Date(),
-    } as User;
+    return mapUserFromDoc(firebaseUser.uid, userDocSnap.data() as Record<string, unknown>);
   } catch (error: unknown) {
     const firebaseError = error as FirebaseError;
     throw new AuthError(firebaseError.code, firebaseError.message);
@@ -119,23 +139,14 @@ export const setupAuthStateListener = (
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          const user: User = {
-            id: firebaseUser.uid,
-            email: userData.email,
-            name: userData.name,
-            timezone: userData.timezone,
-            reminderTime: userData.reminderTime,
-            reminderEnabled: userData.reminderEnabled,
-            profilePicture: userData.profilePicture,
-            createdAt: userData.createdAt?.toDate?.() || new Date(),
-            updatedAt: userData.updatedAt?.toDate?.() || new Date(),
-          };
-          callback(user);
+          callback(mapUserFromDoc(firebaseUser.uid, userDocSnap.data() as Record<string, unknown>));
         } else {
-          // User exists in Auth but not in Firestore (shouldn't happen)
-          console.warn('User profile not found in Firestore');
-          callback(null);
+          const defaultProfile = buildDefaultUserProfile(firebaseUser);
+          await setDoc(userDocRef, defaultProfile);
+          callback({
+            id: firebaseUser.uid,
+            ...defaultProfile,
+          });
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);

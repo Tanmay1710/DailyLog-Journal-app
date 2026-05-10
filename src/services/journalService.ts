@@ -10,7 +10,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   Timestamp,
   updateDoc,
@@ -22,11 +21,21 @@ import type { Journal } from '@app-types';
 export const journalService = {
   async createJournal(journal: Omit<Journal, 'id' | 'createdAt' | 'updatedAt'>): Promise<Journal> {
     try {
-      const docRef = await addDoc(collection(db, 'journals'), {
-        ...journal,
+      const journalData: Record<string, unknown> = {
+        userId: journal.userId,
+        title: journal.title,
+        color: journal.color,
+        fieldSchema: journal.fieldSchema,
+        isArchived: journal.isArchived,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-      });
+      };
+
+      if (journal.description && journal.description.trim().length > 0) {
+        journalData.description = journal.description.trim();
+      }
+
+      const docRef = await addDoc(collection(db, 'journals'), journalData);
 
       return {
         id: docRef.id,
@@ -42,19 +51,20 @@ export const journalService = {
 
   async getJournals(userId: string): Promise<Journal[]> {
     try {
-      const q = query(
-        collection(db, 'journals'),
-        where('userId', '==', userId),
-        where('isArchived', '==', false),
-        orderBy('createdAt', 'desc')
-      );
+      // Firestore requires a composite index for a query with two equality filters + orderBy.
+      // To avoid index setup for local/dev use, fetch the user's journals and filter/sort client-side.
+      const q = query(collection(db, 'journals'), where('userId', '==', userId));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
+      const journals = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate?.() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
       })) as Journal[];
+
+      return journals
+        .filter((journal) => journal.isArchived !== true)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('[journalService.getJournals] Error:', error);
       throw error;

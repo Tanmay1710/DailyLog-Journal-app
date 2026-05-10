@@ -2,7 +2,7 @@
   "name": "journal-app",
   "version": "0.1.0",
   "description": "DailyLog - iOS Journal App built with React Native and Firebase",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
     "ios": "expo run:ios",

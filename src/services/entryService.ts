@@ -10,7 +10,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   Timestamp,
   updateDoc,
@@ -18,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@config/firebaseConfig';
 import type { Entry } from '@app-types';
+import { getCurrentFirebaseUser } from '@services/authService';
 
 export const entryService = {
   async createEntry(entry: Omit<Entry, 'id' | 'createdAt' | 'updatedAt'>): Promise<Entry> {
@@ -42,19 +42,40 @@ export const entryService = {
 
   async getEntries(journalId: string): Promise<Entry[]> {
     try {
+      const currentUser = getCurrentFirebaseUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
       const q = query(
         collection(db, 'entries'),
         where('journalId', '==', journalId),
-        orderBy('entryDate', 'desc'),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', currentUser.uid)
       );
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-      })) as Entry[];
+      const entries = querySnapshot.docs.map((doc) => {
+        const data = doc.data() as Record<string, unknown>;
+        const rawCreatedAt = data.createdAt as any;
+        const rawUpdatedAt = data.updatedAt as any;
+        const createdAt = rawCreatedAt?.toDate?.() ?? (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
+        const updatedAt = rawUpdatedAt?.toDate?.() ?? (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
+
+        return {
+          ...data,
+          id: doc.id,
+          createdAt,
+          updatedAt,
+        } as Entry;
+      });
+
+      return entries.sort((a, b) => {
+        const dateA = String(a.entryDate);
+        const dateB = String(b.entryDate);
+        if (dateA !== dateB) {
+          return dateB.localeCompare(dateA);
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
     } catch (error) {
       console.error('[entryService.getEntries] Error:', error);
       throw error;
@@ -63,19 +84,34 @@ export const entryService = {
 
   async getEntriesByDate(journalId: string, date: string): Promise<Entry[]> {
     try {
+      const currentUser = getCurrentFirebaseUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
       const q = query(
         collection(db, 'entries'),
         where('journalId', '==', journalId),
-        where('entryDate', '==', date),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', currentUser.uid),
+        where('entryDate', '==', date)
       );
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-      })) as Entry[];
+      const entries = querySnapshot.docs.map((doc) => {
+        const data = doc.data() as Record<string, unknown>;
+        const rawCreatedAt = data.createdAt as any;
+        const rawUpdatedAt = data.updatedAt as any;
+        const createdAt = rawCreatedAt?.toDate?.() ?? (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
+        const updatedAt = rawUpdatedAt?.toDate?.() ?? (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
+
+        return {
+          ...data,
+          id: doc.id,
+          createdAt,
+          updatedAt,
+        } as Entry;
+      });
+
+      return entries.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('[entryService.getEntriesByDate] Error:', error);
       throw error;

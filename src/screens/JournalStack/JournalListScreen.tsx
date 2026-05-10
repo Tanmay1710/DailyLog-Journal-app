@@ -74,6 +74,7 @@ export function JournalListScreen(): JSX.Element {
           <Text className="mt-2 text-xs text-gray-500">
             {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
           </Text>
+          <Text className="mt-1 text-xs font-medium text-green-600">Status: Active</Text>
         </View>
         <View className="items-end">
           <View className="mb-3 h-5 w-5 rounded-full border border-gray-300" style={{ backgroundColor: item.color }} />

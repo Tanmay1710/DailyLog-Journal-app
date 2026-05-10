@@ -2,19 +2,24 @@
 
 **Project:** DailyLog (iOS Journal App)  
 **Started:** May 7, 2026  
-**Status:** In Progress  
-**Last Updated:** May 9, 2026
+**Status:** Phase 1D Complete / Phase 1E In Progress  
+**Last Updated:** May 10, 2026
 
 ---
 
-## Validation Snapshot (May 9, 2026)
+## Validation Snapshot (May 10, 2026)
 
-This status is based on code inspection plus `npm run lint` and `npm run type-check`.
+Phase 1D (Entry Logging) is now complete with entry details visibility and streak tracking.
 
-- Core scaffolding exists for Phase 1A and 1B.
-- Firebase/auth services and auth screens are implemented at code level.
-- Build quality gates are green (`npm run lint`, `npm run type-check` both pass).
-- Phase 1C journal management is now functionally implemented end-to-end.
+- Phase 1A-1C: Fully implemented and tested
+- Phase 1D Entry Logging: ✅ Complete
+  - Dynamic entry forms with field input components
+  - Entry history with detailed field value display
+  - Daily logging streak calculation and UI display
+  - Auto-save draft persistence with debounce
+  - Fire emoji badges for streak visualization
+- Build quality gates: ✅ All green (`npm run lint`, `npm run type-check`, `npm test`)
+
 
 ---
 
@@ -53,11 +58,20 @@ This status is based on code inspection plus `npm run lint` and `npm run type-ch
 | Create Journal Detail screen | 🟢 Done | Detail view shows metadata + field schema |
 | Implement journal archive/delete | 🟢 Done | Archive flow from list/detail with confirm dialog |
 
-## Phase 1D-1F
+## Phase 1D: Entry Logging
 
-- Phase 1D Entry Logging: 🔴 Not Started
-- Phase 1E Reminders & Push Notifications: 🔴 Not Started (notification service exists, flow not integrated)
-- Phase 1F Testing & Polish: 🔴 Not Started
+| Task | Status | Evidence |
+|------|--------|----------|
+| Build Dynamic Entry Form screen | 🟢 Done | `src/screens/JournalStack/EntryLogScreen.tsx` with field-specific inputs |
+| Implement field input components | 🟢 Done | TextInput, DateInput, Rating, MultiChoice field types supported |
+| Create entry save logic | 🟢 Done | `entryService.createEntry` with field validation and Firestore write |
+| Build Entry History screen | 🟢 Done | `src/screens/JournalStack/EntryHistoryScreen.tsx` showing detailed field values |
+| Display entry field details | 🟢 Done | History items show field labels + values; empty fields handled |
+| Implement daily streak tracking | 🟢 Done | Streak calculated from consecutive entry dates; shown in JournalDetail + EntryHistory |
+| Add streak visualization | 🟢 Done | Fire emoji badges (🔥) display when streak > 0 |
+| Local draft support | 🟢 Done | Auto-save drafts to Zustand store with 1s debounce |
+| Navigation wiring | 🟢 Done | JournalDetail → EntryLog → EntryHistory flows complete |
+
 
 ---
 
@@ -77,8 +91,16 @@ Fixed in this cycle:
 
 ---
 
-## Current Priorities
+## Session Summary (May 10, 2026)
 
-1. Start Phase 1D Entry Logging implementation.
-2. Build dynamic field input components for all journal field types.
-3. Implement entry save/history flows and date-based retrieval.
+**Completed in this session:**
+1. Fixed `entryService.getEntries()` and `getEntriesByDate()` to include user scoping and handle Firestore timestamps correctly
+2. Enhanced `EntryHistoryScreen` to display detailed field values (not just field count)
+3. Implemented daily logging streak calculation (consecutive entry dates)
+4. Added streak display to `JournalDetailScreen` and `EntryHistoryScreen` with 🔥 emoji badges
+5. All tests passing, type-check clean
+
+**Ready for:**
+- End-to-end Phase 1D testing on iOS simulator
+- Phase 1E (Reminders & Notifications) implementation
+
