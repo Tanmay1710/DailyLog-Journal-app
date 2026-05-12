@@ -45,20 +45,14 @@ export function JournalListScreen(): JSX.Element {
       className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm"
       onPress={() => navigation.navigate('JournalDetail', { journalId: item.id })}
     >
-      <View className="flex-row items-center gap-2">
-        <View
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
-        <View className="flex-1">
-            <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
-          {item.description ? (
-            <Text className="mt-1 text-sm text-slate-600">{item.description}</Text>
-          ) : null}
-          <Text className="mt-2 text-xs text-slate-500">
-            {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
-          </Text>
-        </View>
+      <View className="flex-1">
+          <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
+        {item.description ? (
+          <Text className="mt-1 text-sm text-slate-600">{item.description}</Text>
+        ) : null}
+        <Text className="mt-2 text-xs text-slate-500">
+          {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
+        </Text>
       </View>
     </TouchableOpacity>
   );
