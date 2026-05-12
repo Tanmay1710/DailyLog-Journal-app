@@ -6,7 +6,6 @@
 import { initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
-import { getMessaging, isSupported, Messaging } from 'firebase/messaging';
 
 // Suppress Firebase internal warnings about auth initialization in dev
 const originalConsoleWarn = console.warn;
@@ -51,14 +50,5 @@ console.warn = originalConsoleWarn;
 // Initialize Firebase services
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
-
-// Initialize messaging (only if supported)
-export let messaging: Messaging | null = null;
-
-isSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-});
 
 export { firebaseConfig, app };

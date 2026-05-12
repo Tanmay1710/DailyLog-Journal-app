@@ -7,15 +7,11 @@ import {
   cancelAllScheduledNotificationsAsync,
   cancelScheduledNotificationAsync,
   getAllScheduledNotificationsAsync,
-  getDevicePushTokenAsync,
   NotificationRequestInput,
   requestPermissionsAsync,
   scheduleNotificationAsync,
   setNotificationHandler,
 } from 'expo-notifications';
-
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@config/firebaseConfig';
 
 export const notificationService = {
   async requestNotificationPermission(): Promise<boolean> {
@@ -25,20 +21,6 @@ export const notificationService = {
     } catch (error) {
       console.error('[notificationService.requestNotificationPermission] Error:', error);
       return false;
-    }
-  },
-
-  async getDeviceToken(): Promise<string> {
-    try {
-      const token = await getDevicePushTokenAsync();
-      return token.data;
-    } catch (error) {
-      // Push token registration only works in production builds
-      // with proper Apple Developer account + provisioning profile.
-      // This is expected in dev builds and Expo Go.
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn('[notificationService.getDeviceToken] Push token unavailable:', message);
-      throw error;
     }
   },
 
@@ -149,39 +131,6 @@ export const notificationService = {
       await cancelScheduledNotificationAsync(notificationId);
     } catch (error) {
       console.error('[notificationService.cancelLocalNotification] Error:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Save the FCM device token to Firestore for the given user.
-   */
-  async saveFcmTokenToFirestore(userId: string, token: string): Promise<void> {
-    try {
-      const userDocRef = doc(db, 'users', userId);
-      await setDoc(userDocRef, { fcmToken: token }, { merge: true });
-    } catch (error) {
-      console.error('[notificationService.saveFcmTokenToFirestore] Error:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Retrieve the FCM device token from Firestore for the given user.
-   */
-  async getFcmTokenFromFirestore(userId: string): Promise<string | null> {
-    try {
-      const userDocRef = doc(db, 'users', userId);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        const data = userDocSnap.data();
-        return data.fcmToken || null;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('[notificationService.getFcmTokenFromFirestore] Error:', error);
       throw error;
     }
   },

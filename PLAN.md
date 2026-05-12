@@ -41,8 +41,8 @@
   - Full navigation wiring (JournalDetail → EntryLog → EntryHistory)
 - **Phase 1E Group A (Notification Foundation)**: Complete
   - Notification Zustand store (`notificationStore.ts`)
-  - Enhanced notification service with daily recurring scheduling + FCM token persistence
-  - Wired foreground handler and FCM token registration in `App.tsx`
+  - Enhanced notification service with daily recurring scheduling
+  - Wired foreground handler in `App.tsx`
 - **Phase 1E Group B (Settings Screens + Navigation)**: Complete
   - `ReminderSettingsScreen.tsx`: time picker, enable/disable toggle, test notification button
   - `ProfileScreen.tsx`: email display, name/timezone editing, log out, delete account placeholder
@@ -55,7 +55,7 @@
 | Item | Status | Notes |
 |------|--------|-------|
 | Firebase console config | 🟡 Partial | Code present, console-side setup not fully verified |
-| Notification service | 🟡 Partial | Core exists (`expo-notifications`), FCM token refresh + deep linking pending |
+| Notification service | 🟢 Complete | Uses `expo-notifications` local scheduling only; FCM path removed |
 | `src/hooks/` | 🟡 Empty | Directory exists, **all files need to be created** |
 | Google OAuth | 🟡 Partial | Auth service supports it, not integrated into UI |
 
@@ -63,8 +63,6 @@
 
 - Custom hooks (useAuth, useJournals, useEntries, useNotifications — Group E)
 - Deep linking from notifications to specific journal (Group F)
-- FCM token refresh flow (Group G)
-- Cloud Functions (reminder scheduler, user cleanup — Group H)
 - Firestore security rules (Group H)
 - Comprehensive test coverage (Group I / Phase 1F)
 - Dark mode support (Group J)
@@ -212,8 +210,6 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
   │                                      │
   ├──► Group E (Hooks) ──────────────────┤
   │                                      │
-  ├──► Group G (FCM Refresh) ────────────┤
-  │                                      │
   └──► Group H (Cloud Functions) ────────┤
                                          ▼
                                     Group I (Testing)
@@ -228,11 +224,11 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 
 | Task | File | Description | Est. | Status |
 |------|------|-------------|------|--------|
-| **A1** | `src/store/notificationStore.ts` | Zustand store: reminder time, enabled flag, FCM token, scheduled notification IDs | 15 min | ✅ Done |
-| **A2** | `src/services/notificationService.ts` | Daily recurring scheduling, cancel all, FCM token persistence (5 new methods) | 30 min | ✅ Done |
-| **A3** | `src/App.tsx` | Foreground handler, notification permission request, FCM token registration | 20 min | ✅ Done |
+| **A1** | `src/store/notificationStore.ts` | Zustand store: reminder time, enabled flag, scheduled notification IDs | 15 min | ✅ Done |
+| **A2** | `src/services/notificationService.ts` | Daily recurring scheduling, cancel all, FCM persistence removed (local-only) | 30 min | ✅ Done |
+| **A3** | `src/App.tsx` | Foreground handler, notification permission request (FCM registration removed) | 20 min | ✅ Done |
 
-**Deliverables:** Notification store, service methods for scheduling + FCM, handlers wired in App entry point.
+**Deliverables:** Notification store, service methods for scheduling, handlers wired in App entry point.
 
 ---
 
@@ -334,16 +330,9 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 
 ---
 
-#### Group G: FCM Token Refresh Flow [🥉] ⏳ Not Started
+#### Group G: REMOVED — FCM Token Refresh (not needed, local-only notifications)
 
-| Task | File | Description | Est. |
-|------|------|-------------|------|
-| **G1** | `src/services/notificationService.ts` | Get token via `getDevicePushTokenAsync()` on login | 5 min |
-| **G2** | `src/services/notificationService.ts` | Save to `users/{userId}/fcmToken` in Firestore | 5 min |
-| **G3** | `src/services/notificationService.ts` + `src/App.tsx` | Listen for token refresh (`onTokenRefresh` if using `firebase/messaging`) | 5 min |
-| **G4** | `src/services/notificationService.ts` | On logout: remove token from Firestore | 5 min |
-
-**Group G total:** 20 min
+**Rationale:** DailyLog uses local notifications only. No Apple Developer account required, no FCM dependency. Removed in May 10, 2026 session.
 
 ---
 
@@ -352,7 +341,7 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 | Task | File | Description | Est. |
 |------|------|-------------|------|
 | **H1** | `firebase/functions/package.json`, `firebase/functions/tsconfig.json` | Functions project setup + TypeScript config | 10 min |
-| **H2** | `firebase/functions/src/reminderScheduler.ts` | Pub/sub function (hourly): query users with `reminderEnabled == true` + matching hour → send FCM `{ type: 'reminder', journalId: null }` | 25 min |
+| **H2** | ~~`firebase/functions/src/reminderScheduler.ts`~~ | REMOVED — not needed (local-only notifications) | — |
 | **H3** | `firebase/functions/src/userCleanup.ts` | Auth trigger on user delete: cascade-delete journals + entries + user doc | 15 min |
 | **H4** | `firebase/functions/src/index.ts` | Export both functions from entry point | 5 min |
 | **H5** | `firebase/firestore.rules` | Security rules: owner-only access for users, journals, entries | 10 min |
@@ -407,11 +396,11 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 | **D** | Screen Wireframe Alignment | 7 (D1-D7) | ~11h 00m | ✅ Done |
 | **E** | Custom Hooks | 4 (E1-E4) | ~1h 35m | ⏳ Not Started |
 | **F** | Deep Linking + Landing UI | 5 (F1-F5) | ~1h 15m | ⏳ Not Started |
-| **G** | FCM Token Refresh | 4 (G1-G4) | ~0h 20m | ⏳ Not Started |
-| **H** | Cloud Functions | 6 (H1-H6) | ~1h 10m | ⏳ Not Started |
+| **G** | ~~FCM Token Refresh~~ | — | — | 🔴 Removed |
+| **H** | Cloud Functions | 5 (H1-H6, H2 removed) | ~45 min | ⏳ Not Started |
 | **I** | Notification Testing | 8 scenarios | ~0h 45m | ⏳ Not Started |
 | **J** | Dark Mode & Theme Context | 5 (J1-J5) | ~1h 50m | ⏳ Not Started |
-| | **Total Phase 1E** | **~50** | **~25 hours** | 🟡 |
+| | **Total Phase 1E** | **~45** | **~23 hours** | 🟡 |
 
 ---
 
@@ -551,10 +540,10 @@ Phase 1A (Setup) ──► Phase 1B (Auth) ──► Phase 1C (Journals) ──�
                                                               │            ▼                            │
                                                               │  Group F (Deep Linking + Landing UI)     │
                                                               │            │                            │
-                                                              │  ┌─────────┼─────────────┐               │
-                                                              │  ▼         ▼             ▼               │
-                                                              │  Group G   Group H      Group I          │
-                                                              │  (FCM)     (Cloud Fn)   (Testing)        │
+                                                              │  ┌─────────┼────────────┐               │
+                                                               │  ▼         ▼            ▼               │
+                                                               │  Group H   Group I     Group J          │
+                                                               │  (Cloud    (Testing)   (Dark Mode)      │
                                                               │            │             │               │
                                                               │            └──────┬──────┘               │
                                                               │                   ▼                      │
@@ -584,10 +573,9 @@ Phase 1A (Setup) ──► Phase 1B (Auth) ──► Phase 1C (Journals) ──�
 | **9** | **D7** (ReminderSettings) | Uses InlineBanner from C |
 | **10** | **D2** (NewJournal) | Uses BottomSheet from C |
 | **11** | **F** (Deep Linking) | Needs polished JournalDetail to land on |
-| **12** | **G** (FCM Refresh) | Can be done any time after D7 |
-| **13** | **H** (Cloud Functions) | Can be done in parallel with D/F |
-| **14** | **I** (Testing) | After all code is in place |
-| **15** | **J** (Dark Mode) | Last — applies theme context across all polished screens |
+| **12** | **H** (Cloud Functions) | Can be done in parallel with D/F |
+| **13** | **I** (Testing) | After all code is in place |
+| **14** | **J** (Dark Mode) | Last — applies theme context across all polished screens |
 
 ---
 
@@ -638,7 +626,7 @@ May 10-11:  Group C (Component Library) + C4 (Design Tokens)         ~4.5h ✅
 May 12-13:  Group D (Screen Wireframe Alignment - all 7 screens)      ~11h ✅
 May 13-14:  Group E (Hooks) + Group F (Deep Link)                    ~3.5h
 May 14:     Group E (Hooks) + Group F (Deep Link) catch-up            ~3.5h
-May 15:     Group G (FCM Refresh) + H (Cloud Functions)               ~1.5h
+May 15:     Group H (Cloud Functions)                                  ~1.5h
 May 15-16:  Group I (Testing) + J (Dark Mode)                         ~2.5h
 May 17-18:  Phase 1F (Test, Audit, Polish)                            ~6.5h
 May 19-21:  Buffer / Bug fixes

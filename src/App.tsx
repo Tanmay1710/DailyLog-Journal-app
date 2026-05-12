@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { AuthProvider, useAuth } from '@context/AuthContext';
 import { RootNavigator } from '@navigation/RootNavigator';
 import { notificationService } from '@services/notificationService';
-import { useNotificationStore } from '@store/notificationStore';
 
 /**
  * Inner component that handles notification setup after auth is ready.
@@ -13,7 +12,6 @@ import { useNotificationStore } from '@store/notificationStore';
  */
 function AppContent(): JSX.Element {
   const { user } = useAuth();
-  const { setFcmToken, setEnabled } = useNotificationStore();
 
   useEffect(() => {
     // Set up foreground notification handler once on mount
@@ -22,25 +20,12 @@ function AppContent(): JSX.Element {
 
   useEffect(() => {
     if (user) {
-      // Request notification permission and register FCM token when user is authenticated
+    // Request notification permissions when user is authenticated
       (async () => {
         try {
-          const granted = await notificationService.requestNotificationPermission();
-          setEnabled(granted);
-
-          if (granted) {
-            try {
-              const token = await notificationService.getDeviceToken();
-              setFcmToken(token);
-              await notificationService.saveFcmTokenToFirestore(user.id, token);
-            } catch (innerError) {
-              // Silently handle — push token registration only works in production builds
-              // with proper Apple Developer account + provisioning profile
-              console.warn('[App] Push notifications not available in dev build (expected)');
-            }
-          }
+          await notificationService.requestNotificationPermission();
         } catch (error) {
-          console.warn('[App] Notification setup error:', error);
+          console.warn('[App] Notification permission error:', error);
         }
       })();
     }

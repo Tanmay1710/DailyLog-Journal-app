@@ -374,3 +374,29 @@ Fixed in this cycle:
 - tests: ✅ 9 passed (2 suites)
 
 **Next:** Groups E (hooks), F (dark mode), G (FCM + deep link)
+
+---
+
+## Session Summary (May 10, 2026) — FCM Removal (Local-Only Notifications)
+
+**Completed:**
+1. Removed FCM/push notification dependency — all notifications are now local-only via expo-notifications
+2. Cleaned notificationService.ts: removed getDeviceToken(), saveFcmTokenToFirestore(), getFcmTokenFromFirestore() + firebase/firestore imports
+3. Cleaned notificationStore.ts: removed fcmToken field and setFcmToken action
+4. Cleaned App.tsx: removed FCM token registration on auth, kept permission request + foreground handler
+5. Cleaned firebaseConfig.ts: removed getMessaging/isSupported initialization
+6. Updated PLAN.md: removed Group G entirely, updated Group A/H task descriptions, adjusted timeline/estimates
+
+**Files modified (6 source + 1 docs):**
+- src/services/notificationService.ts (removed 3 FCM methods)
+- src/store/notificationStore.ts (removed fcmToken)
+- src/App.tsx (removed FCM token setup)
+- src/config/firebaseConfig.ts (removed firebase/messaging)
+- PLAN.md (removed Group G, updated all references)
+
+**Quality gates:**
+- lint: ✅ 0 errors, 0 warnings
+- type-check: ✅ 0 errors
+- tests: ✅ 9 passed (2 suites)
+
+**Next:** Group E (Custom Hooks), Group F (Deep Linking)
