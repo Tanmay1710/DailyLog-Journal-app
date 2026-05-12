@@ -40,6 +40,8 @@ When working on this project, follow these rules strictly:
 - **`PLAN.md`** — Contains the detailed implementation roadmap, phase breakdown, current status, and all planned work. **This is the primary guide for what to build next.** Always consult PLAN.md before starting any work.
 - **`CODEBASE.md`** — Contains detailed architecture documentation, data flow diagrams, and module-level API descriptions. Refer to this for implementation details and design decisions.
 - **`AGENTS.md`** (this file) — Contains rules and guidelines for AI agents interacting with the codebase.
+- **`dailylog-screen-prd.md`** — Contains the product requirements document (PRD) for all screens: user stories, acceptance criteria, edge cases, and error states. **Always read this before implementing any screen or feature** to ensure alignment with product requirements.
+- **`dailylog-wireframes.html`** — Contains the full-fidelity wireframes for all screens (9 screens: My Journals, New Journal, Journal Detail, Entry Log, Entry History, Profile, Reminder Settings, Notification Deep Link, Component System). **Always consult this for visual layout, spacing, component placement, and interaction patterns** before writing UI code.
 
 ### 2.2 Activity Log — MANDATORY
 
@@ -67,13 +69,23 @@ If any quality gate fails, either fix it or document it clearly as a known issue
 
 ### 2.4 Workflow
 
-1. **Read** — Start by reading `README.md`, `PLAN.md`, and `ACTIVITY_LOG.md` to understand current state.
+1. **Read** — Start by reading `README.md`, `PLAN.md`, `ACTIVITY_LOG.md`, `dailylog-screen-prd.md`, and `dailylog-wireframes.html` to understand current state and product requirements.
 2. **Plan** — Determine which phase/task from PLAN.md to work on next.
 3. **Implement** — Make changes following the existing architecture patterns.
 4. **Verify** — Run quality gates (lint, type-check, test).
 5. **Document** — Append to `ACTIVITY_LOG.md` with a summary of what was done.
 6. **Update PLAN.md** — Mark tasks as complete, update status, and adjust the roadmap if needed.
 7. **Update CODEBASE.md** — After completing any feature or module implementation, update CODEBASE.md to reflect new files, changed data flows, and updated architecture. Follow the "Updating This Document" checklist at the bottom of CODEBASE.md.
+8. **Deploy & Push to Git** — After all quality gates pass and documentation is updated, commit and push all changes to the remote Git repository:
+   ```bash
+   git add -A
+   git commit -m "[Phase X.Y] Brief description of what was completed"
+   git push
+   ```
+   - Commit messages should reference the phase/group being completed (e.g., `[Phase 1E Group C] Build reusable component library`).
+   - If working on a specific task, reference the task ID (e.g., `[Phase 1E C2c] Implement RatingInput component`).
+   - Push without force unless absolutely necessary.
+   - Only skip this step if explicitly asked by the user or if there's a technical issue preventing the push.
 
 ### 2.5 Architecture Principles
 

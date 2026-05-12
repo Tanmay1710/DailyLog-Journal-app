@@ -29,6 +29,10 @@ export interface Journal {
   title: string;
   description?: string;
   color: string; // hex color: #FF5733
+  /** Emoji icon displayed on journal cards (e.g., "🌿", "💪") */
+  emoji?: string;
+  /** Whether the journal is pinned to the top of the list */
+  pinned?: boolean;
   fieldSchema: JournalFieldDefinition[];
   createdAt: Date;
   updatedAt: Date;

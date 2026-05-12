@@ -246,3 +246,102 @@ Fixed in this cycle:
 - Task 7: FCM token refresh flow (onTokenRefresh listener)
 - Task 8: Deep linking from notification tap
 
+---
+
+## Session Summary (May 10, 2026) — Wireframe Analysis & Merged Roadmap
+
+**Completed in this session:**
+
+1. **Analyzed `dailylog-wireframes.html`** against existing codebase:
+   - Compared all 9 wireframe screens against 7 existing screens
+   - Identified specific UI gaps (hero cards, pill tabs, rating bubbles, emoji icons, etc.)
+   - Mapped missing component library (src/components/ is empty)
+   - Mapped missing custom hooks (src/hooks/ is empty)
+
+2. **Created comprehensive merged roadmap** in PLAN.md:
+   - Expanded Phase 1E from "Reminders & Notifications" (10 tasks) to "App Completion & Wireframe Alignment" (10 groups, ~50 sub-tasks, ~25 hours)
+   - Moved component library, hooks, design tokens, and dark mode from Phase 1F into Phase 1E (they're prerequisites for wireframe-accurate screens)
+   - Refocused Phase 1F to strictly: testing, accessibility, performance, error handling
+   - Added detailed group breakdowns (A-J) with wireframe references for every task
+   - Added execution priority order with dependency reasoning
+   - Updated milestone timeline (May 10-21)
+
+**Files modified:**
+- Modified: `PLAN.md` (complete rewrite — merged wireframe work into existing plan)
+
+**Quality gates status:**
+- No code changes — planning and documentation only
+- Existing gates remain green (lint, type-check, test)
+
+**Ready for:**
+- Phase 1E Group D: Screen Wireframe Alignment (JournalList, NewJournal, JournalDetail, etc.)
+
+---
+
+## Session Summary (May 10, 2026) — Phase 1E Group C: Component Library
+
+**Completed in this session:**
+
+1. **Created design tokens (C4a, C4b):**
+   - `src/constants/colors.ts` — Full light + dark color palettes matching wireframe (`#f6f4ef` bg, `#0d6b68` accent, `#d9ebe8` accent-soft, etc.)
+   - `src/constants/layout.ts` — Spacing scale, border radii (`lg: 24`, `sm: 16`, `full: 999`), shadow presets, icon sizes
+
+2. **Updated Journal type (C4c):**
+   - Added `emoji` (optional string) and `pinned` (optional boolean) fields
+
+3. **Added `@constants/*` path alias (C4d):**
+   - Updated `tsconfig.json` and `jest.config.js` for import resolution
+
+4. **Built Button components (C1a, C1b):**
+   - `Button.tsx` — Primary (emerald filled), Secondary (border), Danger (rose) variants with loading/disabled states
+   - `IconButton.tsx` — ← ＋ ✎ ⋯ ✓ icons for nav bars
+
+5. **Built Field Input components (C2a-d):**
+   - `FieldTextInput.tsx` — Label, multiline, error state, focus highlight
+   - `DateInput.tsx` — Formatted date display + "Calendar" tag + native date picker integration
+   - `RatingInput.tsx` — 1-5 interactive rating bubbles with active fill
+   - `MultiChoiceInput.tsx` — Segmented button group with active state
+
+6. **Built Layout & Display components (C3a-h):**
+   - `JournalCard.tsx` — Emoji icon, title, description, meta tags, pinned indicator
+   - `HeroCard.tsx` — Gradient-backed card with section label + optional metric badge
+   - `MetricBadge.tsx` — Small card with label + large value/emoji
+   - `PillBar.tsx` — Horizontal pill tabs with active state
+   - `Toast.tsx` — Slide-up animated toast with auto-dismiss (success/error/info)
+   - `InlineBanner.tsx` — Persistent contextual banner (draft status, notification preview)
+   - `LoadingSkeleton.tsx` — Shimmer skeleton with card and text-line variants
+   - `BottomSheet.tsx` — Modal overlay sheet for field type selection
+
+**Files created (16):**
+- `src/constants/colors.ts`
+- `src/constants/layout.ts`
+- `src/components/Common/Button.tsx`
+- `src/components/Common/IconButton.tsx`
+- `src/components/Common/JournalCard.tsx`
+- `src/components/Common/HeroCard.tsx`
+- `src/components/Common/MetricBadge.tsx`
+- `src/components/Common/PillBar.tsx`
+- `src/components/Common/Toast.tsx`
+- `src/components/Common/InlineBanner.tsx`
+- `src/components/Common/LoadingSkeleton.tsx`
+- `src/components/Common/BottomSheet.tsx`
+- `src/components/FieldInputs/TextInput.tsx`
+- `src/components/FieldInputs/DateInput.tsx`
+- `src/components/FieldInputs/RatingInput.tsx`
+- `src/components/FieldInputs/MultiChoiceInput.tsx`
+
+**Files modified (4):**
+- `src/types/index.ts` (added emoji + pinned fields)
+- `tsconfig.json` (added @constants/* alias)
+- `jest.config.js` (added @constants/* alias)
+- `PLAN.md` (marked Group C complete, updated status)
+- `ACTIVITY_LOG.md` (appended this entry)
+
+**Quality gates status:**
+- `npm run lint`: ✅ 0 errors, 0 warnings
+- `npm run type-check`: ✅ 0 errors
+- `npm test -- --runInBand`: ✅ 9 tests passing (2 suites)
+
+**Ready for:**
+- Phase 1E Group D: Screen Wireframe Alignment (D1: JournalList, D2: NewJournal, D3: JournalDetail, D4: EntryLog, D5: EntryHistory, D6: Profile, D7: ReminderSettings)
+

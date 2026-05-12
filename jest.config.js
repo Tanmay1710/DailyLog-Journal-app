@@ -21,6 +21,7 @@ module.exports = {
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@navigation/(.*)$': '<rootDir>/src/navigation/$1',
     '^@context/(.*)$': '<rootDir>/src/context/$1',
+    '^@constants/(.*)$': '<rootDir>/src/constants/$1',
   },
   testMatch: [
     '**/__tests__/**/*.test.ts',
