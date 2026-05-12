@@ -8,6 +8,15 @@ import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { getMessaging, isSupported, Messaging } from 'firebase/messaging';
 
+// Suppress Firebase internal warnings about auth initialization in dev
+const originalConsoleWarn = console.warn;
+console.warn = (...args: unknown[]) => {
+  if (typeof args[0] === 'string' && args[0].includes('@firebase/auth')) {
+    return;
+  }
+  originalConsoleWarn.apply(console, args);
+};
+
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -35,6 +44,9 @@ for (const envVar of requiredEnvVars) {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Restore original console.warn after Firebase initialization
+console.warn = originalConsoleWarn;
 
 // Initialize Firebase services
 export const auth: Auth = getAuth(app);
