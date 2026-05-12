@@ -1082,6 +1082,10 @@ PODS:
     - React-Core
   - RNCPicker (2.11.4):
     - React-Core
+  - RNGestureHandler (2.31.2):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
+    - React-Core
   - RNScreens (3.37.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1153,6 +1157,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1282,6 +1287,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCPicker:
     :path: "../node_modules/@react-native-picker/picker"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   Yoga:
@@ -1349,6 +1356,7 @@ SPEC CHECKSUMS:
   ReactCommon: 9c38e8797dc2ac72edf63cd18cf450d918575666
   RNCAsyncStorage: b6410dead2732b5c72a7fdb1ecb5651bbcf4674b
   RNCPicker: 7de564dce1f90b53e386a24001aafc3578233dfe
+  RNGestureHandler: 2051054b0bba4ae30afaaaadf5e0babee49a9f26
   RNScreens: 3ce54903891fd6281865ad3e7cfe4c2bb438c70c
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: a813a6d82538ccba91c54406404e3ed80b48a692

@@ -29,9 +29,15 @@ function AppContent(): JSX.Element {
           setEnabled(granted);
 
           if (granted) {
-            const token = await notificationService.getDeviceToken();
-            setFcmToken(token);
-            await notificationService.saveFcmTokenToFirestore(user.id, token);
+            try {
+              const token = await notificationService.getDeviceToken();
+              setFcmToken(token);
+              await notificationService.saveFcmTokenToFirestore(user.id, token);
+            } catch (innerError) {
+              // Silently handle — push token registration only works in production builds
+              // with proper Apple Developer account + provisioning profile
+              console.warn('[App] Push notifications not available in dev build (expected)');
+            }
           }
         } catch (error) {
           console.warn('[App] Notification setup error:', error);
