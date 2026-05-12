@@ -33,7 +33,11 @@ export const notificationService = {
       const token = await getDevicePushTokenAsync();
       return token.data;
     } catch (error) {
-      console.error('[notificationService.getDeviceToken] Error:', error);
+      // Push token registration only works in production builds
+      // with proper Apple Developer account + provisioning profile.
+      // This is expected in dev builds and Expo Go.
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('[notificationService.getDeviceToken] Push token unavailable:', message);
       throw error;
     }
   },
