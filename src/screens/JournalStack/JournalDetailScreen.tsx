@@ -146,10 +146,7 @@ export function JournalDetailScreen(): JSX.Element {
 
   return (
     <ScrollView className="flex-1 bg-slate-50 px-4 py-4">
-      <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-slate-900">{journal.title}</Text>
-        <View className="h-6 w-6 rounded-full border border-slate-300" style={{ backgroundColor: journal.color }} />
-      </View>
+      <Text className="mb-4 text-2xl font-bold text-slate-900">{journal.title}</Text>
 
       {journal.description ? (
         <Text className="mb-4 text-base text-slate-700">{journal.description}</Text>
@@ -167,20 +164,35 @@ export function JournalDetailScreen(): JSX.Element {
         {entriesError ? <Text className="mt-2 text-xs text-rose-100">{entriesError}</Text> : null}
       </View>
 
-      <Text className="mb-2 text-lg font-semibold text-slate-900">Custom Fields</Text>
+      <Text className="mb-2 text-base font-semibold text-slate-900">Custom Fields</Text>
       {journal.fieldSchema.length === 0 ? (
-        <Text className="mb-6 text-sm text-slate-500">No custom fields configured.</Text>
+        <Text className="mb-4 text-sm text-slate-500">No custom fields configured.</Text>
       ) : (
-        journal.fieldSchema.map((field) => (
-          <View key={field.id} className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-            <Text className="text-base font-medium text-slate-900">{field.label}</Text>
-            <Text className="mt-1 text-sm text-slate-600">Type: {field.type}</Text>
-            <Text className="mt-1 text-sm text-slate-600">Required: {field.required ? 'Yes' : 'No'}</Text>
-            {field.type === 'multiChoice' && field.options?.length ? (
-              <Text className="mt-1 text-sm text-slate-600">Options: {field.options.join(', ')}</Text>
-            ) : null}
-          </View>
-        ))
+        <View className="mb-4 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-sm">
+          {journal.fieldSchema.map((field, index) => (
+            <View
+              key={field.id}
+              className={`flex-row items-center justify-between py-2 ${index < journal.fieldSchema.length - 1 ? 'border-b border-slate-100' : ''}`}
+            >
+              <View className="flex-1 flex-row items-center gap-2">
+                <Text className="text-sm font-medium text-slate-900">{field.label}</Text>
+                <View className="rounded-full bg-slate-100 px-2 py-0.5">
+                  <Text className="text-xs text-slate-500">{field.type}</Text>
+                </View>
+              </View>
+              <View className="flex-row items-center gap-1">
+                {field.type === 'multiChoice' && field.options?.length ? (
+                  <Text className="text-xs text-slate-400">{field.options.length} options</Text>
+                ) : null}
+                {field.required ? (
+                  <View className="ml-1 rounded bg-amber-50 px-1.5 py-0.5">
+                    <Text className="text-xs text-amber-600">Required</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          ))}
+        </View>
       )}
 
       <TouchableOpacity className="mb-3 rounded-3xl bg-slate-900 px-4 py-3 shadow-sm" onPress={handleLogEntry}>
