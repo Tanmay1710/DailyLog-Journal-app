@@ -95,8 +95,8 @@ export function EntryHistoryScreen(): JSX.Element {
     );
 
     return (
-      <TouchableOpacity className="mb-3 rounded-xl border border-gray-200 bg-white p-4">
-        <Text className="text-lg font-semibold text-black">{item.entryDate}</Text>
+      <TouchableOpacity className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+        <Text className="text-lg font-semibold text-slate-900">{item.entryDate}</Text>
 
         {filledFields.length === 0 ? (
           <Text className="mt-1 text-sm text-gray-600">No fields filled for this entry.</Text>
@@ -106,8 +106,8 @@ export function EntryHistoryScreen(): JSX.Element {
               const fieldLabel = journal?.fieldSchema.find((field) => field.id === fieldId)?.label ?? fieldId;
               return (
                 <View key={fieldId} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                  <Text className="text-sm font-medium text-black">{fieldLabel}</Text>
-                  <Text className="mt-1 text-sm text-gray-700">{formatFieldValue(value)}</Text>
+                  <Text className="text-sm font-medium text-slate-900">{fieldLabel}</Text>
+                  <Text className="mt-1 text-sm text-slate-700">{formatFieldValue(value)}</Text>
                 </View>
               );
             })}
@@ -120,21 +120,21 @@ export function EntryHistoryScreen(): JSX.Element {
   };
 
   return (
-    <View className="flex-1 bg-white px-4 py-4">
+    <View className="flex-1 bg-slate-50 px-4 py-4">
       {error ? (
-        <View className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
-          <Text className="text-sm text-red-700">{error}</Text>
+        <View className="mb-4 rounded-3xl border border-rose-200 bg-rose-50 p-3 shadow-sm">
+          <Text className="text-sm text-rose-700">{error}</Text>
         </View>
       ) : null}
 
       {entries.length > 0 ? (
-        <View className="mb-4 rounded-xl border border-black bg-black px-4 py-4">
+        <View className="mb-4 rounded-3xl bg-emerald-700 px-4 py-4 shadow-sm">
           <View className="flex-row items-center justify-between">
             <Text className="text-lg font-semibold text-white">Current streak</Text>
             {currentStreak > 0 ? <Text className="text-3xl">🔥</Text> : null}
           </View>
           <Text className="mt-1 text-2xl font-bold text-white">{currentStreak} day{currentStreak === 1 ? '' : 's'}</Text>
-          <Text className="mt-1 text-sm text-gray-200">Consecutive days logged in this journal</Text>
+          <Text className="mt-1 text-sm text-slate-100">Consecutive days logged in this journal</Text>
         </View>
       ) : null}
 

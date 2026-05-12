@@ -17,8 +17,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTabletMode": true,
-      "targetVersion": "17.0",
+      "supportsTablet": true,
       "bundleIdentifier": "com.dailylog.app"
     },
     "android": {

@@ -165,9 +165,9 @@ export function EntryLogScreen(): JSX.Element {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-4">
+      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
         <Text className="mb-4 text-center text-base text-red-600">{error}</Text>
-        <TouchableOpacity className="rounded-lg bg-black px-4 py-2" onPress={() => void loadJournal()}>
+        <TouchableOpacity className="rounded-3xl bg-slate-900 px-4 py-2 shadow-sm" onPress={() => void loadJournal()}>
           <Text className="text-white">Retry</Text>
         </TouchableOpacity>
       </View>
@@ -176,39 +176,39 @@ export function EntryLogScreen(): JSX.Element {
 
   if (!journal) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-4">
+      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
         <Text className="text-base text-gray-600">Loading entry form...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-4">
+    <ScrollView className="flex-1 bg-slate-50 px-4 py-4">
       <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-black">Log entry for {journal.title}</Text>
-        {hasDraft ? <View className="h-2 w-2 rounded-full bg-green-600" /> : null}
+        <Text className="text-2xl font-bold text-slate-900">Log entry for {journal.title}</Text>
+        {hasDraft ? <View className="h-2 w-2 rounded-full bg-emerald-600" /> : null}
       </View>
 
       {hasDraft ? (
-        <View className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
-          <Text className="text-sm text-green-700">Draft saved</Text>
+        <View className="mb-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-3 shadow-sm">
+          <Text className="text-sm text-emerald-700">Draft saved</Text>
           <TouchableOpacity onPress={handleDiscardDraft}>
-            <Text className="mt-1 text-xs font-medium text-green-600">Discard draft</Text>
+            <Text className="mt-1 text-xs font-medium text-emerald-600">Discard draft</Text>
           </TouchableOpacity>
         </View>
       ) : null}
 
-      <Text className="mb-2 text-sm font-medium text-gray-700">Entry Date</Text>
+      <Text className="mb-2 text-sm font-medium text-slate-700">Entry Date</Text>
       <TextInput
-        className="mb-4 rounded-xl border border-gray-300 px-4 py-3"
+        className="mb-4 rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
         placeholder="YYYY-MM-DD"
         value={entryDate}
         onChangeText={setEntryDate}
       />
 
       {journal.fieldSchema.map((field) => (
-        <View key={field.id} className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
-          <Text className="mb-2 text-base font-medium text-black">
+        <View key={field.id} className="mb-4 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+          <Text className="mb-2 text-base font-medium text-slate-900">
             {field.label}
             {field.required ? ' *' : ''}
           </Text>
@@ -217,17 +217,17 @@ export function EntryLogScreen(): JSX.Element {
             field.options?.map((option) => (
               <TouchableOpacity
                 key={option}
-                className={`mb-2 rounded-lg border px-3 py-2 ${fieldValues[field.id] === option ? 'border-black bg-black' : 'border-gray-300 bg-white'}`}
+                className={`mb-2 rounded-3xl border px-3 py-2 ${fieldValues[field.id] === option ? 'border-emerald-700 bg-emerald-700' : 'border-slate-300 bg-white'}`}
                 onPress={() => handleChangeValue(field.id, option)}
               >
-                <Text className={`text-sm ${fieldValues[field.id] === option ? 'text-white' : 'text-gray-700'}`}>
+                <Text className={`text-sm ${fieldValues[field.id] === option ? 'text-white' : 'text-slate-700'}`}>
                   {option}
                 </Text>
               </TouchableOpacity>
             ))
           ) : (
             <TextInput
-              className="rounded-xl border border-gray-300 bg-white px-4 py-3"
+              className="rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
               placeholder={field.type === 'rating' ? 'Enter a rating (1-5)' : field.type === 'date' ? 'YYYY-MM-DD' : 'Enter your response'}
               value={fieldValues[field.id]}
               keyboardType={field.type === 'rating' ? 'numeric' : 'default'}
@@ -238,7 +238,7 @@ export function EntryLogScreen(): JSX.Element {
       ))}
 
       <TouchableOpacity
-        className="mb-10 rounded-xl bg-black px-4 py-3"
+        className="mb-10 rounded-3xl bg-emerald-700 px-4 py-3 shadow-sm"
         onPress={() => void handleSaveEntry()}
         disabled={isLoading}
       >

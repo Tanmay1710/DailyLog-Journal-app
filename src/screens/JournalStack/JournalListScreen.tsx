@@ -62,27 +62,32 @@ export function JournalListScreen(): JSX.Element {
 
   const renderJournalItem = ({ item }: { item: Journal }): JSX.Element => (
     <TouchableOpacity
-      className="mb-3 rounded-xl border border-gray-200 bg-white p-4"
+      className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm"
       onPress={() => navigation.navigate('JournalDetail', { journalId: item.id })}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-lg font-semibold text-black">{item.title}</Text>
+          <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
           {item.description ? (
-            <Text className="mt-1 text-sm text-gray-600">{item.description}</Text>
+            <Text className="mt-1 text-sm text-slate-600">{item.description}</Text>
           ) : null}
-          <Text className="mt-2 text-xs text-gray-500">
+          <Text className="mt-2 text-xs text-slate-500">
             {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
           </Text>
-          <Text className="mt-1 text-xs font-medium text-green-600">Status: Active</Text>
+          <Text className={`mt-2 text-xs font-medium ${item.isArchived ? 'text-rose-600' : 'text-emerald-600'}`}>
+            Status: {item.isArchived ? 'Archived' : 'Active'}
+          </Text>
         </View>
         <View className="items-end">
-          <View className="mb-3 h-5 w-5 rounded-full border border-gray-300" style={{ backgroundColor: item.color }} />
+          <View
+            className="mb-3 h-5 w-5 rounded-full border border-gray-300"
+            style={{ backgroundColor: item.isArchived ? '#ef4444' : '#22c55e' }}
+          />
           <TouchableOpacity
-            className="rounded-lg border border-red-300 px-3 py-1"
+            className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1"
             onPress={() => handleArchive(item.id)}
           >
-            <Text className="text-xs font-medium text-red-600">Archive</Text>
+            <Text className="text-xs font-semibold text-rose-700">Archive</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -90,9 +95,9 @@ export function JournalListScreen(): JSX.Element {
   );
 
   return (
-    <View className="flex-1 bg-white px-4 py-4">
+    <View className="flex-1 bg-slate-50 px-4 py-4">
       <TouchableOpacity
-        className="mb-4 rounded-xl bg-black px-4 py-3"
+        className="mb-4 rounded-3xl bg-emerald-700 px-4 py-3 shadow-sm"
         onPress={() => navigation.navigate('NewJournal')}
       >
         <Text className="text-center text-base font-semibold text-white">Create Journal</Text>

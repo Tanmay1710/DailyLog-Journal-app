@@ -2,7 +2,7 @@
 
 **Project:** DailyLog (iOS Journal App)  
 **Started:** May 7, 2026  
-**Status:** Phase 1D Complete / Phase 1E In Progress  
+**Status:** Phase 1E Tasks 1-6 Complete / Tasks 7-8 In Progress  
 **Last Updated:** May 10, 2026
 
 ---
@@ -103,4 +103,146 @@ Fixed in this cycle:
 **Ready for:**
 - End-to-end Phase 1D testing on iOS simulator
 - Phase 1E (Reminders & Notifications) implementation
+
+---
+
+## UI Theme Polish (May 10, 2026)
+
+- Applied soothing visual theme across all journal screens
+- Updated backgrounds to slate-50, cards to white/95 with shadows
+- Changed primary buttons to emerald-700, secondary to slate-900
+- Softened text colors to slate palette
+- Refined form inputs and action buttons for consistency
+- Verified with type-check and iOS build
+
+---
+
+## Session Summary (May 10, 2026) — Documentation & Roadmap Update
+
+**Completed in this session:**
+1. Performed full project code analysis — reviewed all 20+ source files
+2. Created `AGENTS.md` with comprehensive agent guidelines:
+   - Project introduction and tech stack overview
+   - Rules of engagement (source of truth, workflow, quality gates)
+   - Mandatory activity log update policy (append only, never remove)
+   - Architecture principles, file naming conventions, import alias reference
+3. Expanded `PLAN.md` with full roadmap:
+   - Added Phase 0 (Foundation & Documentation) as ongoing phase
+   - Added Phase 2 (Advanced Features) with 7 feature items (templates, analytics, search, i18n, Apple Sign-In, widgets, backup)
+   - Added Phase 3 (Production Readiness) with 6 release pipeline tasks (EAS Build, TestFlight, App Store, Crashlytics, Analytics, Monitoring)
+   - Added Table of Contents, Dependency Map, Milestone Timeline
+   - Added detailed task breakdowns with numbered status tables for Phases 1E and 1F
+   - Added Risks & Mitigations table with likelihood/impact scoring
+   - Added quality gates matrix with coverage thresholds
+4. Documented current project gaps (empty components/, hooks/, SettingsStack/)
+
+**Files modified/created:**
+- Created: `AGENTS.md` (new file — agent guidelines)
+- Modified: `PLAN.md` (expanded roadmap, added phases 0/2/3)
+- Modified: `ACTIVITY_LOG.md` (appended this entry)
+
+**Quality gates status:**
+- No code changes — documentation only
+- Existing gates remain green (lint, type-check, test)
+
+**Ready for:**
+- Phase 1E implementation — begin with `notificationStore.ts` and `ReminderSettingsScreen.tsx`
+
+---
+
+## Session Summary (May 10, 2026) — Phase 1E Implementation (Tasks 1-3)
+
+**Completed in this session:**
+1. **Task 1 — Created `notificationStore.ts`** (Zustand store):
+   - Reminder time, enabled flag, FCM token, scheduled notification ID state
+   - All setter actions + reset method
+   - Follows same pattern as `authStore.ts`
+
+2. **Task 2 — Enhanced `notificationService.ts`**:
+   - Added `scheduleDailyReminder(hour, minute)` — daily recurring local notification
+   - Added `cancelAllScheduledNotifications()` — cancel all pending
+   - Added `getAllScheduledNotifications()` — list pending
+   - Added `saveFcmTokenToFirestore(userId, token)` — persist FCM token to `users/{userId}`
+   - Added `getFcmTokenFromFirestore(userId)` — retrieve FCM token
+
+3. **Task 3 — Wired notification handlers in `App.tsx`**:
+   - Added `AppContent` inner component to access auth context
+   - `useEffect` on mount → sets up foreground notification handler
+   - `useEffect` on `user` → requests permissions, gets FCM token, saves to Firestore
+
+4. **Fixed pre-existing lint errors** in `entryService.ts`:
+   - Replaced 4 `as any` casts with proper `FirestoreTimestamp | Date | undefined` types
+   - Fixed import ordering
+
+5. **Fixed Jest configuration** for nativewind compatibility:
+   - Created `__mocks__/react-native.js` with Appearance, I18nManager, and other stubs
+   - Added `transformIgnorePatterns` for nativewind, react-native, expo packages
+   - All 9 tests now passing
+
+**Files modified/created:**
+- Created: `src/store/notificationStore.ts`
+- Modified: `src/services/notificationService.ts` (enhanced with 5 new methods)
+- Modified: `src/App.tsx` (notification handlers + auth-aware AppContent)
+- Modified: `src/services/entryService.ts` (fixed lint errors)
+- Created: `__mocks__/react-native.js` (Jest mock)
+- Modified: `jest.config.js` (nativewind compatibility)
+- Modified: `PLAN.md` (marked Tasks 1-3 complete, updated status)
+- Modified: `ACTIVITY_LOG.md` (appended this entry)
+
+**Quality gates status:**
+- `npm run lint`: ✅ 0 errors, 0 warnings
+- `npm run type-check`: ✅ 0 errors
+- `npm test -- --runInBand`: ✅ 9 tests passing (2 suites)
+
+**Ready for:**
+- Task 4: Create `ReminderSettingsScreen.tsx`
+- Task 5: Create `ProfileScreen.tsx`
+- Task 6: Restructure navigation with bottom tabs
+
+---
+
+## Session Summary (May 10, 2026) — Phase 1E Implementation (Tasks 4-6)
+
+**Completed in this session:**
+
+1. **Task 4 — Created `ReminderSettingsScreen.tsx`**:
+   - Time input field with HH:MM format and `validateTime` validation
+   - Enable/disable Switch toggle with contextual description text
+   - "Send Test Notification" button (schedules 1-minute-out local notification)
+   - "Save Settings" button that persists to Firestore (`reminderTime`, `reminderEnabled`) and schedules/cancels local notifications
+   - Follows slate/emerald/rose visual theme with rounded-3xl cards, shadows
+   - Accessibility labels on all interactive elements
+
+2. **Task 5 — Created `ProfileScreen.tsx`**:
+   - Display user email (read-only)
+   - Editable name field with `validateName` validation
+   - Editable timezone field with `validateTimezone` validation
+   - "Save Changes" button → `authService.updateUserProfile()`
+   - "Log Out" button with Alert confirmation dialog; cancels notifications + resets notification store before logout
+   - "Delete Account" button (placeholder — requires Cloud Function, shows "Coming Soon" message)
+   - App version display at bottom
+
+3. **Task 6 — Restructured navigation with bottom tabs**:
+   - Created `src/navigation/SettingsStack.tsx` with `Profile` and `ReminderSettings` routes
+   - Modified `RootNavigator.tsx` to use `createBottomTabNavigator` with `MainTabs` component
+   - Auth gating still works: unauthenticated → `AuthStack`, authenticated → `MainTabs`
+   - Tab bar: "Journals" (journal icon) + "Settings" (gear icon) with emerald-700 active tint
+   - Header managed by each stack individually (headerShown: true in both stacks)
+
+**Files modified/created:**
+- Created: `src/screens/SettingsStack/ReminderSettingsScreen.tsx`
+- Created: `src/screens/SettingsStack/ProfileScreen.tsx`
+- Created: `src/navigation/SettingsStack.tsx`
+- Modified: `src/navigation/RootNavigator.tsx` (bottom tab navigation)
+- Modified: `PLAN.md` (marked Tasks 4-6 complete, updated Current Reality)
+- Modified: `ACTIVITY_LOG.md` (appended this entry)
+
+**Quality gates status:**
+- `npm run lint`: ✅ 0 errors, 0 warnings
+- `npm run type-check`: ✅ 0 errors
+- `npm test -- --runInBand`: ✅ 9 tests passing (2 suites)
+
+**Ready for:**
+- Task 7: FCM token refresh flow (onTokenRefresh listener)
+- Task 8: Deep linking from notification tap
 

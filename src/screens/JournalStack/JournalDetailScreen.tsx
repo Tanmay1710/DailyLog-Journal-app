@@ -119,17 +119,17 @@ export function JournalDetailScreen(): JSX.Element {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-4">
-        <Text className="text-base text-gray-600">Loading journal...</Text>
+      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
+        <Text className="text-base text-slate-600">Loading journal...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-4">
+      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
         <Text className="mb-4 text-center text-base text-red-600">{error}</Text>
-        <TouchableOpacity className="rounded-lg bg-black px-4 py-2" onPress={() => void loadJournal()}>
+        <TouchableOpacity className="rounded-3xl bg-slate-900 px-4 py-2 shadow-sm" onPress={() => void loadJournal()}>
           <Text className="text-white">Retry</Text>
         </TouchableOpacity>
       </View>
@@ -138,64 +138,64 @@ export function JournalDetailScreen(): JSX.Element {
 
   if (!journal) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-4">
-        <Text className="text-base text-gray-600">Journal not found.</Text>
+      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
+        <Text className="text-base text-slate-600">Journal not found.</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-4">
+    <ScrollView className="flex-1 bg-slate-50 px-4 py-4">
       <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-black">{journal.title}</Text>
-        <View className="h-6 w-6 rounded-full border border-gray-300" style={{ backgroundColor: journal.color }} />
+        <Text className="text-2xl font-bold text-slate-900">{journal.title}</Text>
+        <View className="h-6 w-6 rounded-full border border-slate-300" style={{ backgroundColor: journal.color }} />
       </View>
 
       {journal.description ? (
-        <Text className="mb-4 text-base text-gray-700">{journal.description}</Text>
+        <Text className="mb-4 text-base text-slate-700">{journal.description}</Text>
       ) : (
-        <Text className="mb-4 text-base italic text-gray-500">No description</Text>
+        <Text className="mb-4 text-base italic text-slate-500">No description</Text>
       )}
 
-      <View className="mb-4 rounded-xl border border-black bg-black px-4 py-4">
+      <View className="mb-4 rounded-3xl bg-emerald-700 px-4 py-4 shadow-sm">
         <View className="flex-row items-center justify-between">
           <Text className="text-lg font-semibold text-white">Current streak</Text>
           {currentStreak > 0 ? <Text className="text-3xl">🔥</Text> : null}
         </View>
         <Text className="mt-1 text-2xl font-bold text-white">{currentStreak} day{currentStreak === 1 ? '' : 's'}</Text>
-        <Text className="mt-1 text-sm text-gray-200">Consecutive days logged in this journal</Text>
-        {entriesError ? <Text className="mt-2 text-xs text-red-200">{entriesError}</Text> : null}
+        <Text className="mt-1 text-sm text-slate-100">Consecutive days logged in this journal</Text>
+        {entriesError ? <Text className="mt-2 text-xs text-rose-100">{entriesError}</Text> : null}
       </View>
 
-      <Text className="mb-2 text-lg font-semibold text-black">Custom Fields</Text>
+      <Text className="mb-2 text-lg font-semibold text-slate-900">Custom Fields</Text>
       {journal.fieldSchema.length === 0 ? (
-        <Text className="mb-6 text-sm text-gray-500">No custom fields configured.</Text>
+        <Text className="mb-6 text-sm text-slate-500">No custom fields configured.</Text>
       ) : (
         journal.fieldSchema.map((field) => (
-          <View key={field.id} className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
-            <Text className="text-base font-medium text-black">{field.label}</Text>
-            <Text className="mt-1 text-sm text-gray-600">Type: {field.type}</Text>
-            <Text className="mt-1 text-sm text-gray-600">Required: {field.required ? 'Yes' : 'No'}</Text>
+          <View key={field.id} className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+            <Text className="text-base font-medium text-slate-900">{field.label}</Text>
+            <Text className="mt-1 text-sm text-slate-600">Type: {field.type}</Text>
+            <Text className="mt-1 text-sm text-slate-600">Required: {field.required ? 'Yes' : 'No'}</Text>
             {field.type === 'multiChoice' && field.options?.length ? (
-              <Text className="mt-1 text-sm text-gray-600">Options: {field.options.join(', ')}</Text>
+              <Text className="mt-1 text-sm text-slate-600">Options: {field.options.join(', ')}</Text>
             ) : null}
           </View>
         ))
       )}
 
-      <TouchableOpacity className="mb-3 rounded-xl bg-black px-4 py-3" onPress={handleLogEntry}>
+      <TouchableOpacity className="mb-3 rounded-3xl bg-slate-900 px-4 py-3 shadow-sm" onPress={handleLogEntry}>
         <Text className="text-center text-base font-semibold text-white">Log Daily Entry</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="mb-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3"
+        className="mb-3 rounded-3xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm"
         onPress={() => navigation.navigate('EntryHistory', { journalId })}
       >
-        <Text className="text-center text-base font-semibold text-gray-800">View Entries</Text>
+        <Text className="text-center text-base font-semibold text-slate-900">View Entries</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity className="mb-10 rounded-xl border border-red-300 px-4 py-3" onPress={handleArchive}>
-        <Text className="text-center text-base font-semibold text-red-600">Archive Journal</Text>
+      <TouchableOpacity className="mb-10 rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 shadow-sm" onPress={handleArchive}>
+        <Text className="text-center text-base font-semibold text-rose-700">Archive Journal</Text>
       </TouchableOpacity>
     </ScrollView>
   );

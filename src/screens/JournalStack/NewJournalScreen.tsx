@@ -146,26 +146,26 @@ export function NewJournalScreen(): JSX.Element {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-4">
-      <Text className="mb-2 text-sm font-medium text-gray-700">Journal Title</Text>
+    <ScrollView className="flex-1 bg-slate-50 px-4 py-4">
+      <Text className="mb-2 text-sm font-medium text-slate-700">Journal Title</Text>
       <TextInput
-        className="mb-4 rounded-xl border border-gray-300 px-4 py-3"
+        className="mb-4 rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
         placeholder="Journal Title"
         value={title}
         onChangeText={setTitle}
       />
 
-      <Text className="mb-2 text-sm font-medium text-gray-700">Description (Optional)</Text>
+      <Text className="mb-2 text-sm font-medium text-slate-700">Description (Optional)</Text>
       <TextInput
-        className="mb-4 rounded-xl border border-gray-300 px-4 py-3"
+        className="mb-4 rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
       />
 
-      <Text className="mb-2 text-sm font-medium text-gray-700">Color (Hex)</Text>
+      <Text className="mb-2 text-sm font-medium text-slate-700">Color (Hex)</Text>
       <TextInput
-        className="mb-4 rounded-xl border border-gray-300 px-4 py-3"
+        className="mb-4 rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
         placeholder="#FF5733"
         value={color}
         onChangeText={setColor}
@@ -173,16 +173,16 @@ export function NewJournalScreen(): JSX.Element {
       />
 
       <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-base font-semibold text-black">Custom Fields</Text>
-        <TouchableOpacity className="rounded-lg bg-gray-900 px-3 py-2" onPress={handleAddField}>
+        <Text className="text-base font-semibold text-slate-900">Custom Fields</Text>
+        <TouchableOpacity className="rounded-3xl bg-slate-900 px-3 py-2 shadow-sm" onPress={handleAddField}>
           <Text className="text-sm font-semibold text-white">+ Add Field</Text>
         </TouchableOpacity>
       </View>
 
       {fields.map((field) => (
-        <View key={field.id} className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <View key={field.id} className="mb-4 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
           <TextInput
-            className="mb-3 rounded-lg border border-gray-300 bg-white px-3 py-2"
+            className="mb-3 rounded-3xl border border-slate-300 bg-white px-3 py-2 shadow-sm"
             placeholder="Field label"
             value={field.label}
             onChangeText={(label) => updateField(field.id, { label })}
@@ -192,10 +192,10 @@ export function NewJournalScreen(): JSX.Element {
             {FIELD_TYPES.map((type) => (
               <TouchableOpacity
                 key={type}
-                className={`rounded-lg border px-3 py-2 ${field.type === type ? 'border-black bg-black' : 'border-gray-300 bg-white'}`}
+                className={`rounded-3xl border px-3 py-2 ${field.type === type ? 'border-emerald-700 bg-emerald-700' : 'border-slate-300 bg-white'}`}
                 onPress={() => updateField(field.id, { type })}
               >
-                <Text className={`text-xs font-medium ${field.type === type ? 'text-white' : 'text-gray-700'}`}>
+                <Text className={`text-xs font-medium ${field.type === type ? 'text-white' : 'text-slate-700'}`}>
                   {type}
                 </Text>
               </TouchableOpacity>
@@ -204,7 +204,7 @@ export function NewJournalScreen(): JSX.Element {
 
           {field.type === 'multiChoice' ? (
             <TextInput
-              className="mb-3 rounded-lg border border-gray-300 bg-white px-3 py-2"
+              className="mb-3 rounded-3xl border border-slate-300 bg-white px-3 py-2 shadow-sm"
               placeholder="Options, comma-separated"
               value={field.optionsText}
               onChangeText={(optionsText) => updateField(field.id, { optionsText })}
@@ -212,7 +212,7 @@ export function NewJournalScreen(): JSX.Element {
           ) : null}
 
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-sm text-gray-700">Required</Text>
+            <Text className="text-sm text-slate-700">Required</Text>
             <Switch value={field.required} onValueChange={(required) => updateField(field.id, { required })} />
           </View>
 
@@ -223,7 +223,7 @@ export function NewJournalScreen(): JSX.Element {
       ))}
 
       <TouchableOpacity
-        className="mb-10 rounded-xl bg-black px-4 py-3"
+        className="mb-10 rounded-3xl bg-emerald-700 px-4 py-3 shadow-sm"
         onPress={() => void handleSaveJournal()}
         disabled={isLoading}
       >

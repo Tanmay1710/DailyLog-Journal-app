@@ -15,6 +15,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore';
+import type { Timestamp as FirestoreTimestamp } from 'firebase/firestore';
 import { db } from '@config/firebaseConfig';
 import type { Entry } from '@app-types';
 import { getCurrentFirebaseUser } from '@services/authService';
@@ -55,10 +56,14 @@ export const entryService = {
       const querySnapshot = await getDocs(q);
       const entries = querySnapshot.docs.map((doc) => {
         const data = doc.data() as Record<string, unknown>;
-        const rawCreatedAt = data.createdAt as any;
-        const rawUpdatedAt = data.updatedAt as any;
-        const createdAt = rawCreatedAt?.toDate?.() ?? (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
-        const updatedAt = rawUpdatedAt?.toDate?.() ?? (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
+        const rawCreatedAt = data.createdAt as FirestoreTimestamp | Date | undefined;
+        const rawUpdatedAt = data.updatedAt as FirestoreTimestamp | Date | undefined;
+        const createdAt = rawCreatedAt && typeof rawCreatedAt === 'object' && 'toDate' in rawCreatedAt
+          ? (rawCreatedAt as FirestoreTimestamp).toDate()
+          : (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
+        const updatedAt = rawUpdatedAt && typeof rawUpdatedAt === 'object' && 'toDate' in rawUpdatedAt
+          ? (rawUpdatedAt as FirestoreTimestamp).toDate()
+          : (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
 
         return {
           ...data,
@@ -98,10 +103,14 @@ export const entryService = {
       const querySnapshot = await getDocs(q);
       const entries = querySnapshot.docs.map((doc) => {
         const data = doc.data() as Record<string, unknown>;
-        const rawCreatedAt = data.createdAt as any;
-        const rawUpdatedAt = data.updatedAt as any;
-        const createdAt = rawCreatedAt?.toDate?.() ?? (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
-        const updatedAt = rawUpdatedAt?.toDate?.() ?? (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
+        const rawCreatedAt = data.createdAt as FirestoreTimestamp | Date | undefined;
+        const rawUpdatedAt = data.updatedAt as FirestoreTimestamp | Date | undefined;
+        const createdAt = rawCreatedAt && typeof rawCreatedAt === 'object' && 'toDate' in rawCreatedAt
+          ? (rawCreatedAt as FirestoreTimestamp).toDate()
+          : (rawCreatedAt instanceof Date ? rawCreatedAt : new Date());
+        const updatedAt = rawUpdatedAt && typeof rawUpdatedAt === 'object' && 'toDate' in rawUpdatedAt
+          ? (rawUpdatedAt as FirestoreTimestamp).toDate()
+          : (rawUpdatedAt instanceof Date ? rawUpdatedAt : new Date());
 
         return {
           ...data,

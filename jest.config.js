@@ -3,7 +3,12 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'babel-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|@react-native|react-native-.*|expo-.*|@expo-.*|nativewind|react-navigation|@react-navigation|@sentry)/)',
+  ],
   moduleNameMapper: {
+    '^react-native$': '<rootDir>/__mocks__/react-native.js',
+    '^react-native/(.*)$': '<rootDir>/__mocks__/react-native.js',
     '^@screens/(.*)$': '<rootDir>/src/screens/$1',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',

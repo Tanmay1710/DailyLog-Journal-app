@@ -4,13 +4,18 @@
  */
 
 import {
+  cancelAllScheduledNotificationsAsync,
   cancelScheduledNotificationAsync,
+  getAllScheduledNotificationsAsync,
   getDevicePushTokenAsync,
   NotificationRequestInput,
   requestPermissionsAsync,
   scheduleNotificationAsync,
   setNotificationHandler,
 } from 'expo-notifications';
+
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '@config/firebaseConfig';
 
 export const notificationService = {
   async requestNotificationPermission(): Promise<boolean> {
@@ -81,11 +86,98 @@ export const notificationService = {
     }
   },
 
+  /**
+   * Schedule a daily recurring reminder notification.
+   * @param hour - Hour in 24h format (0-23)
+   * @param minute - Minute (0-59)
+   * @returns The notification ID string
+   */
+  async scheduleDailyReminder(hour: number, minute: number): Promise<string> {
+    try {
+      const notificationId = await scheduleNotificationAsync({
+        content: {
+          title: 'DailyLog Reminder',
+          body: 'Time to journal! 📝 Capture your thoughts for today.',
+          sound: 'default',
+          priority: 'default',
+        },
+        trigger: {
+          hour,
+          minute,
+          repeats: true,
+        },
+      });
+
+      return notificationId;
+    } catch (error) {
+      console.error('[notificationService.scheduleDailyReminder] Error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Cancel all scheduled notifications.
+   */
+  async cancelAllScheduledNotifications(): Promise<void> {
+    try {
+      await cancelAllScheduledNotificationsAsync();
+    } catch (error) {
+      console.error('[notificationService.cancelAllScheduledNotifications] Error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get all currently scheduled notifications.
+   */
+  async getAllScheduledNotifications(): Promise<unknown[]> {
+    try {
+      const notifications = await getAllScheduledNotificationsAsync();
+      return notifications;
+    } catch (error) {
+      console.error('[notificationService.getAllScheduledNotifications] Error:', error);
+      throw error;
+    }
+  },
+
   async cancelLocalNotification(notificationId: string): Promise<void> {
     try {
       await cancelScheduledNotificationAsync(notificationId);
     } catch (error) {
       console.error('[notificationService.cancelLocalNotification] Error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Save the FCM device token to Firestore for the given user.
+   */
+  async saveFcmTokenToFirestore(userId: string, token: string): Promise<void> {
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      await setDoc(userDocRef, { fcmToken: token }, { merge: true });
+    } catch (error) {
+      console.error('[notificationService.saveFcmTokenToFirestore] Error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Retrieve the FCM device token from Firestore for the given user.
+   */
+  async getFcmTokenFromFirestore(userId: string): Promise<string | null> {
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const data = userDocSnap.data();
+        return data.fcmToken || null;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('[notificationService.getFcmTokenFromFirestore] Error:', error);
       throw error;
     }
   },
