@@ -1,24 +1,56 @@
 /**
- * Profile Screen
- * User profile management — edit name, timezone, logout, delete account.
+ * Profile Screen — wireframe-aligned (Wireframe 6)
+ *
+ * Features: emoji avatar (🙂) in hero card, editable name/timezone,
+ * Reminder Settings nav link with "›", Edit "✎" button in header,
+ * "Safe" tag on Logout, "Cloud fn" tag on Delete, Save Changes CTA.
  */
 
-import { useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '@context/AuthContext';
 import { authService } from '@services/authService';
 import { validateName, validateTimezone } from '@utils/validation';
 import { handleAuthError } from '@utils/errorHandler';
 import { useNotificationStore } from '@store/notificationStore';
 import { notificationService } from '@services/notificationService';
+import type { SettingsStackParamList } from '@navigation/SettingsStack';
+import { HeroCard } from '@components/Common/HeroCard';
+import { Button } from '@components/Common/Button';
+import { IconButton } from '@components/Common/IconButton';
+import { FieldTextInput } from '@components/FieldInputs/TextInput';
+import { lightColors } from '@constants/colors';
+import { radii, shadows } from '@constants/layout';
+
+type ProfileNavigationProp = NativeStackNavigationProp<SettingsStackParamList, 'Profile'>;
 
 export function ProfileScreen(): JSX.Element {
+  const navigation = useNavigation<ProfileNavigationProp>();
   const { user, logout, isLoading: authLoading } = useAuth();
   const { reset: resetNotificationStore, scheduledNotificationId } = useNotificationStore();
 
   const [name, setName] = useState(user?.name || '');
   const [timezone, setTimezone] = useState(user?.timezone || 'UTC');
   const [isSaving, setIsSaving] = useState(false);
+
+  /** Set header edit button */
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({
+        headerRight: () => (
+          <IconButton
+            icon="✎"
+            label="Edit profile"
+            onPress={() => {
+              Alert.alert('Edit Mode', 'Profile fields are always editable. Make your changes directly.');
+            }}
+          />
+        ),
+      });
+    }, [navigation])
+  );
 
   const handleSaveProfile = async (): Promise<void> => {
     const nameValidation = validateName(name);
@@ -61,7 +93,6 @@ export function ProfileScreen(): JSX.Element {
         onPress: () => {
           void (async () => {
             try {
-              // Cancel any scheduled notifications before logout
               if (scheduledNotificationId) {
                 await notificationService.cancelAllScheduledNotifications();
               }
@@ -86,10 +117,9 @@ export function ProfileScreen(): JSX.Element {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            // Note: Actual deletion with Firebase Admin SDK or Cloud Function
             Alert.alert(
               'Coming Soon',
-              'Account deletion is not yet available directly from the app. Please contact support.'
+              'Account deletion requires a server-side Cloud Function and is not yet available from the app.'
             );
           },
         },
@@ -98,86 +128,232 @@ export function ProfileScreen(): JSX.Element {
   };
 
   return (
-    <View className="flex-1 bg-slate-50 px-4 py-6">
-      {/* Profile Info Section */}
-      <View className="mb-6 rounded-3xl bg-white/95 p-5 shadow-sm">
-        <Text className="mb-4 text-lg font-semibold text-slate-900">Profile Information</Text>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: lightColors.bg }}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* Hero card with emoji avatar */}
+      <HeroCard
+        sectionLabel="Account"
+        title={name || 'Your Name'}
+        subtitle={user?.email || 'No email'}
+        metric={
+          <View
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: radii.sm,
+              backgroundColor: lightColors.accentSoft,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: lightColors.line,
+            }}
+          >
+            <Text style={{ fontSize: 26 }}>🙂</Text>
+          </View>
+        }
+      />
 
+      {/* Editable fields */}
+      <View
+        style={{
+          borderRadius: radii.lg,
+          backgroundColor: lightColors.surface,
+          borderWidth: 1,
+          borderColor: lightColors.line,
+          padding: 16,
+          marginTop: 16,
+          marginBottom: 16,
+          ...shadows.card,
+        }}
+      >
         {/* Email (read-only) */}
-        <View className="mb-4">
-          <Text className="mb-1 text-sm font-medium text-slate-600">Email</Text>
-          <Text className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-base text-slate-500">
-            {user?.email || 'No email'}
+        <View style={{ marginBottom: 16 }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: '600',
+              color: lightColors.muted,
+              marginBottom: 6,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+            }}
+          >
+            Email
           </Text>
+          <View
+            style={{
+              borderRadius: radii.sm,
+              backgroundColor: lightColors.surface2,
+              borderWidth: 1,
+              borderColor: lightColors.line,
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+            }}
+          >
+            <Text style={{ fontSize: 16, color: lightColors.muted }}>
+              {user?.email || 'No email'}
+            </Text>
+          </View>
         </View>
 
-        {/* Name (editable) */}
-        <View className="mb-4">
-          <Text className="mb-1 text-sm font-medium text-slate-600">Name</Text>
-          <TextInput
-            className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900"
-            placeholder="Full Name"
-            value={name}
-            onChangeText={setName}
-            accessibilityLabel="Your full name"
-          />
-        </View>
+        {/* Name */}
+        <FieldTextInput
+          label="Display name"
+          placeholder="Your name"
+          value={name}
+          onChangeText={setName}
+        />
 
-        {/* Timezone (editable) */}
-        <View>
-          <Text className="mb-1 text-sm font-medium text-slate-600">Timezone</Text>
+        {/* Timezone */}
+        <View style={{ marginBottom: 0 }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: '600',
+              color: lightColors.muted,
+              marginBottom: 6,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+            }}
+          >
+            Timezone
+          </Text>
           <TextInput
-            className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900"
-            placeholder="Timezone (e.g., UTC)"
+            placeholder="e.g., Asia/Kolkata"
             value={timezone}
             onChangeText={setTimezone}
-            accessibilityLabel="Your timezone"
+            style={{
+              borderRadius: radii.lg,
+              borderWidth: 1,
+              borderColor: lightColors.line,
+              backgroundColor: lightColors.surface,
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+              fontSize: 16,
+              color: lightColors.text,
+            }}
+            accessibilityLabel="Timezone"
           />
         </View>
       </View>
 
-      {/* Save Changes Button */}
-      <TouchableOpacity
-        className="mb-6 rounded-3xl bg-emerald-700 px-4 py-3 shadow-sm"
+      {/* Save Changes button */}
+      <Button
+        title={isSaving ? 'Saving...' : 'Save Changes'}
         onPress={() => void handleSaveProfile()}
         disabled={isSaving || authLoading}
-        accessibilityLabel="Save profile changes"
+      />
+
+      {/* Account actions */}
+      <View
+        style={{
+          borderRadius: radii.lg,
+          backgroundColor: lightColors.surface,
+          borderWidth: 1,
+          borderColor: lightColors.line,
+          marginTop: 16,
+          marginBottom: 16,
+          ...shadows.card,
+        }}
       >
-        <Text className="text-center text-base font-semibold text-white">
-          {isSaving ? 'Saving...' : 'Save Changes'}
+        <Text
+          style={{
+            fontSize: 12,
+            fontWeight: '600',
+            color: lightColors.muted,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            paddingHorizontal: 16,
+            paddingTop: 14,
+            paddingBottom: 8,
+          }}
+        >
+          Account actions
         </Text>
-      </TouchableOpacity>
 
-      {/* Account Actions */}
-      <View className="mb-6 rounded-3xl bg-white/95 p-5 shadow-sm">
-        <Text className="mb-3 text-base font-semibold text-slate-900">Account</Text>
-
-        {/* Log Out */}
+        {/* Reminder settings nav */}
         <TouchableOpacity
-          className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+          onPress={() => navigation.navigate('ReminderSettings')}
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderTopWidth: 1,
+            borderTopColor: lightColors.line,
+          }}
+          accessibilityLabel="Go to reminder settings"
+        >
+          <Text style={{ fontSize: 15, color: lightColors.text }}>Reminder settings</Text>
+          <Text style={{ fontSize: 18, color: lightColors.muted }}>›</Text>
+        </TouchableOpacity>
+
+        {/* Logout */}
+        <TouchableOpacity
           onPress={handleLogout}
           disabled={authLoading}
-          accessibilityLabel="Log out of your account"
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderTopWidth: 1,
+            borderTopColor: lightColors.line,
+          }}
+          accessibilityLabel="Log out"
         >
-          <Text className="text-center text-base font-semibold text-slate-900">
-            {authLoading ? 'Logging out...' : 'Log Out'}
+          <Text style={{ fontSize: 15, color: lightColors.danger }}>
+            {authLoading ? 'Logging out...' : 'Log out'}
           </Text>
+          <View
+            style={{
+              borderRadius: radii.full,
+              backgroundColor: lightColors.dangerSoft,
+              paddingHorizontal: 9,
+              paddingVertical: 3,
+            }}
+          >
+            <Text style={{ fontSize: 11, color: lightColors.danger, fontWeight: '600' }}>Safe</Text>
+          </View>
         </TouchableOpacity>
 
-        {/* Delete Account */}
+        {/* Delete account */}
         <TouchableOpacity
-          className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3"
           onPress={handleDeleteAccount}
-          accessibilityLabel="Delete your account permanently"
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderTopWidth: 1,
+            borderTopColor: lightColors.line,
+          }}
+          accessibilityLabel="Delete account"
         >
-          <Text className="text-center text-base font-semibold text-rose-700">Delete Account</Text>
+          <Text style={{ fontSize: 15, color: lightColors.danger }}>Delete account</Text>
+          <View
+            style={{
+              borderRadius: radii.full,
+              backgroundColor: lightColors.dangerSoft,
+              paddingHorizontal: 9,
+              paddingVertical: 3,
+            }}
+          >
+            <Text style={{ fontSize: 11, color: lightColors.danger, fontWeight: '600' }}>Cloud fn</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* App Info */}
-      <View className="items-center">
-        <Text className="text-xs text-slate-400">DailyLog v1.0.0</Text>
+      {/* App version */}
+      <View style={{ alignItems: 'center', marginTop: 8 }}>
+        <Text style={{ fontSize: 12, color: lightColors.muted }}>DailyLog v1.0.0</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }

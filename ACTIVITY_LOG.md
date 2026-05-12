@@ -345,3 +345,32 @@ Fixed in this cycle:
 **Ready for:**
 - Phase 1E Group D: Screen Wireframe Alignment (D1: JournalList, D2: NewJournal, D3: JournalDetail, D4: EntryLog, D5: EntryHistory, D6: Profile, D7: ReminderSettings)
 
+
+---
+
+## Session Summary (May 10, 2026) — Phase 1E Group D: Screen Wireframe Alignment (ALL 7)
+
+**Completed:**
+1. JournalListScreen — hero with streak/due, pill tabs, pinned journals, recent activity
+2. NewJournalScreen — emoji picker, bottom sheet field types, Save Draft/Create dual buttons
+3. JournalDetailScreen — hero with metric, schema badges, reminder card, overflow menu
+4. EntryLogScreen — RatingInput bubbles, MultiChoiceInput segmented, DateInput, draft banner
+5. EntryHistoryScreen — filter pills, current+best streak, date grouping, detail modal
+6. ProfileScreen — emoji avatar hero, nav links, safe/cloud-fn tags
+7. ReminderSettingsScreen — bold time display, preview card, scheduling notes
+
+**Files modified (7):**
+- src/screens/JournalStack/JournalListScreen.tsx
+- src/screens/JournalStack/NewJournalScreen.tsx
+- src/screens/JournalStack/JournalDetailScreen.tsx
+- src/screens/JournalStack/EntryLogScreen.tsx
+- src/screens/JournalStack/EntryHistoryScreen.tsx
+- src/screens/SettingsStack/ProfileScreen.tsx
+- src/screens/SettingsStack/ReminderSettingsScreen.tsx
+
+**Quality gates:**
+- lint: ✅ 0 errors, 0 warnings
+- type-check: ✅ 0 errors
+- tests: ✅ 9 passed (2 suites)
+
+**Next:** Groups E (hooks), F (dark mode), G (FCM + deep link)

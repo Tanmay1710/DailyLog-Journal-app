@@ -1,4 +1,5 @@
 /**
+ * 
  * HeroCard Component
  *
  * Gradient-backed hero card with optional metric badge in top-right corner.

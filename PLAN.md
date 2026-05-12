@@ -1,7 +1,7 @@
 # DailyLog — Implementation Plan & Roadmap (Merged)
 
 **Project Name:** DailyLog (iOS Journal App)  
-**Status:** Phase 1E Groups A-C Complete / Groups D-J ⏳  
+**Status:** Phase 1E Groups A-D Complete / Groups E-J ⏳  
 **Last Updated:** May 10, 2026
 
 ---
@@ -58,11 +58,9 @@
 | Notification service | 🟡 Partial | Core exists (`expo-notifications`), FCM token refresh + deep linking pending |
 | `src/hooks/` | 🟡 Empty | Directory exists, **all files need to be created** |
 | Google OAuth | 🟡 Partial | Auth service supports it, not integrated into UI |
-| Screen UI alignment | 🟡 Partial | Screens exist but don't match wireframe designs — Group D pending |
 
 ### What's Missing 🔴
 
-- Screen UI polish to match wireframes (7 screens need updates — Group D)
 - Custom hooks (useAuth, useJournals, useEntries, useNotifications — Group E)
 - Deep linking from notifications to specific journal (Group F)
 - FCM token refresh flow (Group G)
@@ -279,7 +277,7 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 
 ---
 
-#### Group D: Screen Wireframe Alignment [🥇] ⏳ Not Started
+#### Group D: Screen Wireframe Alignment [🥇] ✅ Done
 
 **Goal:** Polish all 7 existing screens to match wireframe fidelity exactly. Depends on Group C (components).
 
@@ -293,7 +291,7 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 | **D6** | `ProfileScreen.tsx` | Emoji avatar (🙂) in hero card; Reminder Settings nav link with `›`; Edit "✎" button in header; "Safe" tag on Logout; "Cloud fn" tag on Delete | Wireframe 6 | 1h |
 | **D7** | `ReminderSettingsScreen.tsx` | Notification preview card ("DailyLog: Time to check in with Gratitude."); Scheduling notes section (permission state, next trigger, local vs cloud); Large bold time display with "Edit" tag; Nav bar save button | Wireframe 7 | 1h |
 
-**Group D total:** ~11 hours
+**Group D total:** ~11 hours ✅ Complete
 
 ---
 
@@ -406,7 +404,7 @@ Group A-C (Foundation + Components) [A✅ B✅ C⏳]
 | **A** | Notification Foundation | 3 | 1h 05m | ✅ Done |
 | **B** | Settings Screens + Navigation | 3 | 1h 45m | ✅ Done |
 | **C** | Reusable Component Library | 16 (C1a-C4c) | ~4h 30m | ✅ Done |
-| **D** | Screen Wireframe Alignment | 7 (D1-D7) | ~11h 00m | ⏳ Not Started |
+| **D** | Screen Wireframe Alignment | 7 (D1-D7) | ~11h 00m | ✅ Done |
 | **E** | Custom Hooks | 4 (E1-E4) | ~1h 35m | ⏳ Not Started |
 | **F** | Deep Linking + Landing UI | 5 (F1-F5) | ~1h 15m | ⏳ Not Started |
 | **G** | FCM Token Refresh | 4 (G1-G4) | ~0h 20m | ⏳ Not Started |
@@ -636,10 +634,10 @@ Done     Done    Done       (Components +    (Cloud Fn +      (Testing +      (A
                               Deep Link)
 
 Detailed schedule:
-May 10-11:  Group C (Component Library) + C4 (Design Tokens)         ~4.5h
-May 12-13:  Group D1-D2-D3 (JournalList, NewJournal, JournalDetail)   ~5h
-May 13-14:  Group D4-D5 (EntryLog, EntryHistory) + Group E (Hooks)    ~5.5h
-May 14:     Group D6-D7 (Profile, ReminderSettings) + Group F (Deep Link)  ~3.5h
+May 10-11:  Group C (Component Library) + C4 (Design Tokens)         ~4.5h ✅
+May 12-13:  Group D (Screen Wireframe Alignment - all 7 screens)      ~11h ✅
+May 13-14:  Group E (Hooks) + Group F (Deep Link)                    ~3.5h
+May 14:     Group E (Hooks) + Group F (Deep Link) catch-up            ~3.5h
 May 15:     Group G (FCM Refresh) + H (Cloud Functions)               ~1.5h
 May 15-16:  Group I (Testing) + J (Dark Mode)                         ~2.5h
 May 17-18:  Phase 1F (Test, Audit, Polish)                            ~6.5h

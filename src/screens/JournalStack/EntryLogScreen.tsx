@@ -1,6 +1,15 @@
+/**
+ * EntryLogScreen
+ *
+ * Dynamic entry form — wireframe-aligned (Wireframe 4).
+ * Features: rating bubble UI, multi-choice as segmented button group,
+ * date picker, draft save banner with live timestamp, nav bar "←" back + "✓" save,
+ * Cancel + Save Entry dual buttons.
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { Journal } from '@app-types';
@@ -9,6 +18,16 @@ import { journalService } from '@services/journalService';
 import { entryService } from '@services/entryService';
 import { useAuth } from '@context/AuthContext';
 import { useJournalStore } from '@store/journalStore';
+import { FieldTextInput } from '@components/FieldInputs/TextInput';
+import { DateInput } from '@components/FieldInputs/DateInput';
+import { RatingInput } from '@components/FieldInputs/RatingInput';
+import { MultiChoiceInput } from '@components/FieldInputs/MultiChoiceInput';
+import { Button } from '@components/Common/Button';
+import { IconButton } from '@components/Common/IconButton';
+import { InlineBanner } from '@components/Common/InlineBanner';
+import { LoadingSkeleton } from '@components/Common/LoadingSkeleton';
+import { lightColors } from '@constants/colors';
+import { radii, shadows } from '@constants/layout';
 
 type EntryLogRouteProp = RouteProp<JournalStackParamList, 'EntryLog'>;
 type EntryLogNavigationProp = NativeStackNavigationProp<JournalStackParamList, 'EntryLog'>;
@@ -23,14 +42,14 @@ export function EntryLogScreen(): JSX.Element {
   const [journal, setJournal] = useState<Journal | null>(null);
   const [entryDate, setEntryDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasDraft, setHasDraft] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const draftSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const loadJournal = useCallback(async (): Promise<void> => {
     try {
-      setIsLoading(true);
       setError(null);
       const data = await journalService.getJournal(journalId);
       setJournal(data);
@@ -40,6 +59,7 @@ export function EntryLogScreen(): JSX.Element {
         setEntryDate(draft.entryDate);
         setFieldValues(draft.fieldValues);
         setHasDraft(true);
+        setLastSavedTime('recovered');
       } else {
         setFieldValues(
           data.fieldSchema.reduce((acc, field) => ({
@@ -50,8 +70,6 @@ export function EntryLogScreen(): JSX.Element {
       }
     } catch {
       setError('Failed to load journal template.');
-    } finally {
-      setIsLoading(false);
     }
   }, [journalId, getDraft]);
 
@@ -59,6 +77,7 @@ export function EntryLogScreen(): JSX.Element {
     void loadJournal();
   }, [loadJournal]);
 
+  /** Auto-save draft with 1s debounce */
   const debouncedAutoSaveDraft = useCallback(() => {
     if (draftSaveTimeout.current) {
       clearTimeout(draftSaveTimeout.current);
@@ -66,6 +85,7 @@ export function EntryLogScreen(): JSX.Element {
     draftSaveTimeout.current = setTimeout(() => {
       setDraft(journalId, { entryDate, fieldValues });
       setHasDraft(true);
+      setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     }, 1000);
   }, [entryDate, fieldValues, journalId, setDraft]);
 
@@ -91,6 +111,7 @@ export function EntryLogScreen(): JSX.Element {
         onPress: () => {
           clearDraft(journalId);
           setHasDraft(false);
+          setLastSavedTime(null);
           setFieldValues(
             journal?.fieldSchema.reduce((acc, field) => ({
               ...acc,
@@ -102,37 +123,34 @@ export function EntryLogScreen(): JSX.Element {
     ]);
   };
 
-  const validateEntry = (): { valid: boolean; message?: string } => {
-    if (!journal) {
-      return { valid: false, message: 'Journal not loaded.' };
-    }
-
-    for (const field of journal.fieldSchema) {
-      if (field.required && !fieldValues[field.id]?.trim()) {
-        return {
-          valid: false,
-          message: `Please answer the required field: ${field.label}`,
-        };
+  const handleSaveEntry = useCallback(async (): Promise<void> => {
+    const validateEntryFn = (): { valid: boolean; message?: string } => {
+      if (!journal) {
+        return { valid: false, message: 'Journal not loaded.' };
       }
-    }
 
-    return { valid: true };
-  };
+      for (const field of journal.fieldSchema) {
+        if (field.required && !fieldValues[field.id]?.trim()) {
+          return { valid: false, message: `Please answer the required field: ${field.label}` };
+        }
+      }
 
-  const handleSaveEntry = async (): Promise<void> => {
+      return { valid: true };
+    };
+
     if (!user?.id) {
       Alert.alert('Authentication Error', 'Please sign in again to save this entry.');
       return;
     }
 
-    const validation = validateEntry();
+    const validation = validateEntryFn();
     if (!validation.valid) {
       Alert.alert('Validation Error', validation.message);
       return;
     }
 
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       const preparedValues: Record<string, unknown> = {};
 
       journal?.fieldSchema.forEach((field) => {
@@ -144,12 +162,10 @@ export function EntryLogScreen(): JSX.Element {
         }
       });
 
-      const dateStr = entryDate;
-
       await entryService.createEntry({
         journalId,
         userId: user.id,
-        entryDate: dateStr,
+        entryDate,
         fieldValues: preparedValues,
       });
 
@@ -159,93 +175,173 @@ export function EntryLogScreen(): JSX.Element {
     } catch {
       Alert.alert('Save Failed', 'Unable to save entry. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  };
+  }, [user?.id, journal, fieldValues, entryDate, journalId, clearDraft, navigation]);
 
+  /** Set nav bar: "←" back + "✓" save */
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({
+        headerLeft: () => (
+          <IconButton
+            icon="←"
+            label="Go back"
+            onPress={() => navigation.goBack()}
+          />
+        ),
+        headerRight: () => (
+          <IconButton
+            icon="✓"
+            label="Save entry"
+            onPress={() => void handleSaveEntry()}
+          />
+        ),
+      });
+    }, [navigation, handleSaveEntry])
+  );
+
+  // Error state
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
-        <Text className="mb-4 text-center text-base text-red-600">{error}</Text>
-        <TouchableOpacity className="rounded-3xl bg-slate-900 px-4 py-2 shadow-sm" onPress={() => void loadJournal()}>
-          <Text className="text-white">Retry</Text>
-        </TouchableOpacity>
+      <View style={{ flex: 1, backgroundColor: lightColors.bg, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
+        <InlineBanner message={error} variant="danger" />
+        <View style={{ marginTop: 16 }}>
+          <Button title="Retry" onPress={() => void loadJournal()} />
+        </View>
       </View>
     );
   }
 
+  // Loading state
   if (!journal) {
     return (
-      <View className="flex-1 items-center justify-center bg-slate-50 px-4">
-        <Text className="text-base text-gray-600">Loading entry form...</Text>
+      <View style={{ flex: 1, backgroundColor: lightColors.bg, padding: 16 }}>
+        <LoadingSkeleton card />
+        <View style={{ height: 16 }} />
+        <LoadingSkeleton card />
+        <View style={{ height: 16 }} />
+        <LoadingSkeleton card />
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-slate-50 px-4 py-4">
-      <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-2xl font-bold text-slate-900">Log entry for {journal.title}</Text>
-        {hasDraft ? <View className="h-2 w-2 rounded-full bg-emerald-600" /> : null}
-      </View>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: lightColors.bg }}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* Journal title */}
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '700',
+          color: lightColors.text,
+          marginBottom: 12,
+        }}
+      >
+        {journal.title}
+      </Text>
 
+      {/* Draft autosave banner */}
       {hasDraft ? (
-        <View className="mb-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-3 shadow-sm">
-          <Text className="text-sm text-emerald-700">Draft saved</Text>
-          <TouchableOpacity onPress={handleDiscardDraft}>
-            <Text className="mt-1 text-xs font-medium text-emerald-600">Discard draft</Text>
-          </TouchableOpacity>
+        <View style={{ marginBottom: 12 }}>
+          <InlineBanner
+            message="Draft autosaved"
+            variant="success"
+            icon="💾"
+            secondary={lastSavedTime ? `Saved ${lastSavedTime}` : undefined}
+            action={
+              <TouchableOpacity
+                onPress={handleDiscardDraft}
+                accessibilityLabel="Discard draft"
+              >
+                <Text style={{ fontSize: 12, color: lightColors.danger, fontWeight: '600' }}>Discard</Text>
+              </TouchableOpacity>
+            }
+          />
         </View>
       ) : null}
 
-      <Text className="mb-2 text-sm font-medium text-slate-700">Entry Date</Text>
-      <TextInput
-        className="mb-4 rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
-        placeholder="YYYY-MM-DD"
+      {/* Entry Date */}
+      <DateInput
+        label="Entry date"
         value={entryDate}
-        onChangeText={setEntryDate}
+        onChange={(dateStr) => {
+          setEntryDate(dateStr);
+          handleChangeValue('_date', dateStr);
+        }}
       />
 
+      {/* Dynamic fields from schema */}
       {journal.fieldSchema.map((field) => (
-        <View key={field.id} className="mb-4 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-          <Text className="mb-2 text-base font-medium text-slate-900">
-            {field.label}
-            {field.required ? ' *' : ''}
-          </Text>
-
-          {field.type === 'multiChoice' ? (
-            field.options?.map((option) => (
-              <TouchableOpacity
-                key={option}
-                className={`mb-2 rounded-3xl border px-3 py-2 ${fieldValues[field.id] === option ? 'border-emerald-700 bg-emerald-700' : 'border-slate-300 bg-white'}`}
-                onPress={() => handleChangeValue(field.id, option)}
-              >
-                <Text className={`text-sm ${fieldValues[field.id] === option ? 'text-white' : 'text-slate-700'}`}>
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <TextInput
-              className="rounded-3xl border border-slate-300 bg-white px-4 py-3 shadow-sm"
-              placeholder={field.type === 'rating' ? 'Enter a rating (1-5)' : field.type === 'date' ? 'YYYY-MM-DD' : 'Enter your response'}
-              value={fieldValues[field.id]}
-              keyboardType={field.type === 'rating' ? 'numeric' : 'default'}
-              onChangeText={(value) => handleChangeValue(field.id, value)}
+        <View
+          key={field.id}
+          style={{
+            borderRadius: radii.lg,
+            backgroundColor: lightColors.surface,
+            borderWidth: 1,
+            borderColor: lightColors.line,
+            padding: 14,
+            marginBottom: 16,
+            ...shadows.card,
+          }}
+        >
+          {field.type === 'text' ? (
+            <FieldTextInput
+              label={`${field.label}${field.required ? ' *' : ''}`}
+              placeholder={`Enter your ${field.label.toLowerCase()}`}
+              value={fieldValues[field.id] || ''}
+              onChangeText={(val) => handleChangeValue(field.id, val)}
+              multiline
             />
-          )}
+          ) : null}
+
+          {field.type === 'date' ? (
+            <DateInput
+              label={`${field.label}${field.required ? ' *' : ''}`}
+              value={fieldValues[field.id] || ''}
+              onChange={(val) => handleChangeValue(field.id, val)}
+            />
+          ) : null}
+
+          {field.type === 'rating' ? (
+            <RatingInput
+              label={`${field.label}${field.required ? ' *' : ''}`}
+              value={fieldValues[field.id] ? Number(fieldValues[field.id]) : null}
+              onChange={(val) => handleChangeValue(field.id, val.toString())}
+            />
+          ) : null}
+
+          {field.type === 'multiChoice' && field.options ? (
+            <MultiChoiceInput
+              label={`${field.label}${field.required ? ' *' : ''}`}
+              options={field.options}
+              value={fieldValues[field.id] || null}
+              onChange={(val) => handleChangeValue(field.id, val)}
+            />
+          ) : null}
         </View>
       ))}
 
-      <TouchableOpacity
-        className="mb-10 rounded-3xl bg-emerald-700 px-4 py-3 shadow-sm"
-        onPress={() => void handleSaveEntry()}
-        disabled={isLoading}
-      >
-        <Text className="text-center text-base font-semibold text-white">
-          {isLoading ? 'Saving...' : 'Save Entry'}
-        </Text>
-      </TouchableOpacity>
+      {/* Cancel + Save Entry buttons */}
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Cancel"
+            variant="secondary"
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            title={isSubmitting ? 'Saving...' : 'Save Entry'}
+            onPress={() => void handleSaveEntry()}
+            disabled={isSubmitting}
+          />
+        </View>
+      </View>
     </ScrollView>
   );
 }
