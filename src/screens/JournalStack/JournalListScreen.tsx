@@ -34,6 +34,7 @@ export function JournalListScreen(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>('active');
   const [allEntries, setAllEntries] = useState<Entry[]>([]);
+  const [journalNameMap, setJournalNameMap] = useState<Record<string, string>>({});
 
   const loadJournals = useCallback(async (): Promise<void> => {
     if (!user?.id) {
@@ -57,14 +58,17 @@ export function JournalListScreen(): JSX.Element {
     if (!user?.id) return;
     try {
       const allRecent: Entry[] = [];
+      const nameMap: Record<string, string> = {};
       // Load entries from the first few journals for recent activity display
       const j = await journalService.getJournals(user.id);
       for (const journal of j.slice(0, 5)) {
+        nameMap[journal.id] = journal.title;
         const entries = await entryService.getEntries(journal.id);
         allRecent.push(...entries.slice(0, 3));
       }
       allRecent.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       setAllEntries(allRecent.slice(0, 5));
+      setJournalNameMap(nameMap);
     } catch {
       // Non-critical — recent activity is decorative
     }
@@ -336,7 +340,7 @@ export function JournalListScreen(): JSX.Element {
                     }}
                   >
                     <Text style={{ fontSize: 14, color: lightColors.text }}>
-                      Logged in journal
+                      Logged in {journalNameMap[entry.journalId] || 'journal'}
                     </Text>
                     <Text style={{ fontSize: 12, color: lightColors.muted }}>
                       {formatActivityTime(entry.createdAt)}
