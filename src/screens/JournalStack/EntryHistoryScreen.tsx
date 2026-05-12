@@ -9,6 +9,25 @@ import { journalService } from '@services/journalService';
 
 type EntryHistoryRouteProp = RouteProp<JournalStackParamList, 'EntryHistory'>;
 
+/** Returns a concise summary string of the entry's field values. */
+const getEntrySummary = (entry: Entry, journal: Journal | null): string => {
+  const parts: string[] = [];
+  if (!journal) {
+    const values = Object.values(entry.fieldValues).filter(
+      (v) => v !== null && v !== undefined && v !== ''
+    );
+    return values.slice(0, 3).map(String).join(', ');
+  }
+  for (const field of journal.fieldSchema) {
+    const value = entry.fieldValues[field.id];
+    if (value === null || value === undefined || value === '') continue;
+    const display = field.type === 'rating' ? `${value}★` : field.type === 'date' ? String(value) : String(value);
+    parts.push(`${field.label}: ${display}`);
+    if (parts.length >= 3) break;
+  }
+  return parts.join(' | ') || 'No data';
+};
+
 export function EntryHistoryScreen(): JSX.Element {
   const route = useRoute<EntryHistoryRouteProp>();
   const { journalId } = route.params;
@@ -69,19 +88,6 @@ export function EntryHistoryScreen(): JSX.Element {
     return streak;
   }, [entries]);
 
-  const formatFieldValue = (value: unknown): string => {
-    if (value === null || value === undefined || value === '') {
-      return 'No response';
-    }
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-    return String(value);
-  };
-
   useFocusEffect(
     useCallback(() => {
       void loadEntries();
@@ -89,52 +95,37 @@ export function EntryHistoryScreen(): JSX.Element {
     }, [loadEntries, loadJournal])
   );
 
-  const renderEntryItem = ({ item }: { item: Entry }): JSX.Element => {
-    const filledFields = Object.entries(item.fieldValues).filter(
-      ([, value]) => value !== null && value !== undefined && value !== ''
-    );
-
-    return (
-      <TouchableOpacity className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm">
-        <Text className="text-lg font-semibold text-slate-900">{item.entryDate}</Text>
-
-        {filledFields.length === 0 ? (
-          <Text className="mt-1 text-sm text-gray-600">No fields filled for this entry.</Text>
-        ) : (
-          <View className="mt-2 space-y-2">
-            {filledFields.map(([fieldId, value]) => {
-              const fieldLabel = journal?.fieldSchema.find((field) => field.id === fieldId)?.label ?? fieldId;
-              return (
-                <View key={fieldId} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                  <Text className="text-sm font-medium text-slate-900">{fieldLabel}</Text>
-                  <Text className="mt-1 text-sm text-slate-700">{formatFieldValue(value)}</Text>
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        <Text className="mt-3 text-xs text-gray-500">Created: {new Date(item.createdAt).toLocaleString()}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const renderEntryItem = ({ item }: { item: Entry }): JSX.Element => (
+    <TouchableOpacity className="mb-2 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-base font-semibold text-slate-900">{item.entryDate}</Text>
+        <Text className="text-xs text-slate-400">
+          {new Date(item.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+      <Text className="mt-1 text-sm text-slate-600" numberOfLines={2}>
+        {getEntrySummary(item, journal)}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View className="flex-1 bg-slate-50 px-4 py-4">
       {error ? (
-        <View className="mb-4 rounded-3xl border border-rose-200 bg-rose-50 p-3 shadow-sm">
+        <View className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-3 shadow-sm">
           <Text className="text-sm text-rose-700">{error}</Text>
         </View>
       ) : null}
 
       {entries.length > 0 ? (
-        <View className="mb-4 rounded-3xl bg-emerald-700 px-4 py-4 shadow-sm">
+        <View className="mb-4 rounded-2xl bg-emerald-700 px-4 py-3 shadow-sm">
           <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-white">Current streak</Text>
-            {currentStreak > 0 ? <Text className="text-3xl">🔥</Text> : null}
+            <Text className="text-base font-semibold text-white">Current streak</Text>
+            {currentStreak > 0 ? <Text className="text-2xl">🔥</Text> : null}
           </View>
-          <Text className="mt-1 text-2xl font-bold text-white">{currentStreak} day{currentStreak === 1 ? '' : 's'}</Text>
-          <Text className="mt-1 text-sm text-slate-100">Consecutive days logged in this journal</Text>
+          <Text className="mt-1 text-xl font-bold text-white">
+            {currentStreak} day{currentStreak === 1 ? '' : 's'}
+          </Text>
         </View>
       ) : null}
 

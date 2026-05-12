@@ -67,29 +67,27 @@ export function JournalListScreen(): JSX.Element {
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-3">
-          <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
+          <View className="flex-row items-center gap-2">
+            <View
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
+          </View>
           {item.description ? (
             <Text className="mt-1 text-sm text-slate-600">{item.description}</Text>
           ) : null}
           <Text className="mt-2 text-xs text-slate-500">
             {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
           </Text>
-          <Text className={`mt-2 text-xs font-medium ${item.isArchived ? 'text-rose-600' : 'text-emerald-600'}`}>
-            Status: {item.isArchived ? 'Archived' : 'Active'}
-          </Text>
         </View>
-        <View className="items-end">
-          <View
-            className="mb-3 h-5 w-5 rounded-full border border-gray-300"
-            style={{ backgroundColor: item.isArchived ? '#ef4444' : '#22c55e' }}
-          />
-          <TouchableOpacity
-            className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1"
-            onPress={() => handleArchive(item.id)}
-          >
-            <Text className="text-xs font-semibold text-rose-700">Archive</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1"
+          onPress={() => handleArchive(item.id)}
+          accessibilityLabel={`Archive ${item.title}`}
+        >
+          <Text className="text-xs font-semibold text-rose-700">Archive</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
