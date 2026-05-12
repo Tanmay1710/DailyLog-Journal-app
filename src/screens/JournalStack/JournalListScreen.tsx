@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '@context/AuthContext';
@@ -40,40 +40,18 @@ export function JournalListScreen(): JSX.Element {
     }, [loadJournals])
   );
 
-  const handleArchive = (journalId: string): void => {
-    Alert.alert('Archive Journal', 'Are you sure you want to archive this journal?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Archive',
-        style: 'destructive',
-        onPress: () => {
-          void (async (): Promise<void> => {
-            try {
-              await journalService.archiveJournal(journalId);
-              await loadJournals();
-            } catch {
-              Alert.alert('Archive Failed', 'Could not archive journal. Please try again.');
-            }
-          })();
-        },
-      },
-    ]);
-  };
-
   const renderJournalItem = ({ item }: { item: Journal }): JSX.Element => (
     <TouchableOpacity
       className="mb-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm"
       onPress={() => navigation.navigate('JournalDetail', { journalId: item.id })}
     >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1 pr-3">
-          <View className="flex-row items-center gap-2">
-            <View
+      <View className="flex-row items-center gap-2">
+        <View
               className="h-3 w-3 rounded-full"
               style={{ backgroundColor: item.color }}
             />
+        <View className="flex-1">
             <Text className="text-lg font-semibold text-slate-900">{item.title}</Text>
-          </View>
           {item.description ? (
             <Text className="mt-1 text-sm text-slate-600">{item.description}</Text>
           ) : null}
@@ -81,13 +59,6 @@ export function JournalListScreen(): JSX.Element {
             {item.fieldSchema.length} custom field{item.fieldSchema.length === 1 ? '' : 's'}
           </Text>
         </View>
-        <TouchableOpacity
-          className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1"
-          onPress={() => handleArchive(item.id)}
-          accessibilityLabel={`Archive ${item.title}`}
-        >
-          <Text className="text-xs font-semibold text-rose-700">Archive</Text>
-        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -122,3 +93,4 @@ export function JournalListScreen(): JSX.Element {
     </View>
   );
 }
+
