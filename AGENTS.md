@@ -73,6 +73,7 @@ If any quality gate fails, either fix it or document it clearly as a known issue
 4. **Verify** — Run quality gates (lint, type-check, test).
 5. **Document** — Append to `ACTIVITY_LOG.md` with a summary of what was done.
 6. **Update PLAN.md** — Mark tasks as complete, update status, and adjust the roadmap if needed.
+7. **Update CODEBASE.md** — After completing any feature or module implementation, update CODEBASE.md to reflect new files, changed data flows, and updated architecture. Follow the "Updating This Document" checklist at the bottom of CODEBASE.md.
 
 ### 2.5 Architecture Principles
 
